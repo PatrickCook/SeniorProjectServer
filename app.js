@@ -3,6 +3,7 @@ var path = require('path');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
+var db = require('./config/db.js')
 
 var index = require('./routes/index');
 var users = require('./routes/users');
@@ -28,20 +29,41 @@ app.use(cookieParser());
 app.use('/api', index);
 app.use('/api/users', users);
 
+app.delete('/api/DB', function(req, res) {
+
+  db.songs.destroy({
+    where: {},
+    truncate: true
+  })
+  db.users.destroy({
+    where: {},
+    truncate: true
+  })
+
+  db.queues.destroy({
+    where: {},
+    truncate: true
+  })
+  
+  db.users.create({
+    username: "admin",
+    first_name: "Patrick",
+    last_name: "Cook",
+    role: "admin",
+    created_at: new Date()
+  })
+  .then(user => {
+    res.json(user);
+  });
+})
+
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
   res.status(404).send("Page not found: 404").end()
 });
 
-// error handler
-app.use(function(err, req, res, next) {
-  // set locals, only providing error in development
-  res.locals.message = err.message;
-  res.locals.error = req.app.get('env') === 'development' ? err : {};
-
-  // render the error page
-  res.status(err.status || 500);
-  res.render('error');
+db.sequelize.sync().then(() => {
+  app.listen(3000, () => {
+    console.log('Express listening on port:', 3000);
+  });
 });
-
-module.exports = app;

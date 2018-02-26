@@ -18,7 +18,18 @@ router.get('/', function(req, res, next) {
  * Perm = 0 for Guest, Perm = 1 for Spotify User
  */
 router.post('/', function(req, res, next) {
-  res.json("Register a user");
+  let body = req.body
+
+  db.users.create({
+    username: body.username,
+    first_name: body.first_name,
+    last_name: body.last_name,
+    role: body.role,
+    created_at: new Date()
+  })
+  .then(user => {
+    res.json(user);
+  });
 });
 
 /* GET /api/users/:id

@@ -3,10 +3,10 @@ var path = require('path');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
-var db = require('./config/db.js')
 
-var index = require('./routes/index');
-var users = require('./routes/users');
+
+var db = require('./config/db.js')
+var Validator = require('./router/Validator.js');
 
 var app = express();
 
@@ -25,9 +25,14 @@ app.use(function(error, req, res, next) {
 
 app.use(cookieParser());
 
+/* Add validator and database utilities to request */
+app.use(function(req, res, next) {
+  req.validator = new Validator(req, res);
+  req.db = db;
+  next();
+})
 
-app.use('/api', index);
-app.use('/api/users', users);
+app.use('/api/users', require('./router/routes/users.js'));
 
 app.delete('/api/DB', function(req, res) {
 
@@ -44,7 +49,7 @@ app.delete('/api/DB', function(req, res) {
     where: {},
     truncate: true
   })
-  
+
   db.users.create({
     username: "admin",
     first_name: "Patrick",

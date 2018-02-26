@@ -1,4 +1,6 @@
 var express = require('express');
+var async = require('async');
+
 var router = express.Router();
 
 router.baseURL = '/api/users'
@@ -19,16 +21,25 @@ router.get('/', function(req, res, next) {
  */
 router.post('/', function(req, res, next) {
   let body = req.body
+  let vld = req.validator
 
-  db.users.create({
-    username: body.username,
-    first_name: body.first_name,
-    last_name: body.last_name,
-    role: body.role,
-    created_at: new Date()
-  })
-  .then(user => {
-    res.json(user);
+  async.waterfall([
+  function(cb) {
+    if (vld.hasFields(body, ["username", "first_name", "last_name", "role"], cb)) {
+      req.db.users.create({
+        username: body.username,
+        first_name: body.first_name,
+        last_name: body.last_name,
+        role: body.role,
+        created_at: new Date()
+      })
+      .then(user => {
+        res.json(user);
+      });
+    }
+  }],
+  function (error) {
+    res.status(200).end();
   });
 });
 

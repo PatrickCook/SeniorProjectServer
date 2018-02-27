@@ -7,6 +7,7 @@ var bodyParser = require('body-parser');
 
 var db = require('./models/index.js')
 var Validator = require('./router/Validator.js');
+var Session = require('./router/Session.js');
 
 var app = express();
 
@@ -25,13 +26,21 @@ app.use(function(error, req, res, next) {
 
 app.use(cookieParser());
 
+app.use(Session.router);
 /* Add validator and database utilities to request */
 app.use(function(req, res, next) {
-  req.validator = new Validator(req, res);
-  req.db = db;
-  next();
+  console.log(req.path, req.method)
+  if (req.session || req.method === 'POST' &&
+   (req.path === '/api/users/' || req.path === '/api/auth/')) {
+    req.validator = new Validator(req, res);
+    req.db = db;
+    next();
+  } else {
+    res.status(401).end();
+  }
 })
 
+app.use('/api/auth', require('./router/routes/auth.js'));
 app.use('/api/users', require('./router/routes/users.js'));
 
 app.delete('/api/DB', function(req, res) {

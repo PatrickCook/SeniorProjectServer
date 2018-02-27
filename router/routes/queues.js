@@ -14,7 +14,16 @@ router.baseURL = '/api/queues'
  * Requires admin permissions to receive all users or returns just the AU
  */
 router.get('/', function(req, res, next) {
+  let filter = {}
+
+  if (req.query.owner)
+    filter.owner = req.query.owner
+
+  if (req.query.name)
+    filter.name = req.query.name
+
   req.db.queues.findAll({
+    where: filter,
     attributes: ['id', 'owner', 'name', 'max_members', 'max_songs',
                  'private', 'createdAt', 'updatedAt']
   })
@@ -103,48 +112,16 @@ router.get('/:id', function(req, res, next) {
   });
 });
 
-/* PUT /api/users/:id
- * Allows a user to update their access and refresh tokens for Spotify.
- * Requires AU and perm = 1 or admin.
- * Primarily used for refreshing Spotify access tokens
- */
-router.put('/:id', function(req, res, next) {
-  let body = req.body
-  let vld = req.validator
-  console.log(req.body)
 
-  async.waterfall([
-  function(cb) {
-    if (vld.allowOnlyFields(body, AllowedFields.putUser, cb)) {
-      req.db.users.update(body, { where: {id: req.params.id }})
-      .then(user => {
-        res.json({
-          status: "success",
-          data: user
-        })
-      })
-      .catch(error => {
-          res.json({
-            status: "error",
-            error: error,
-            data: []
-          })
-      });
-    }
-  }],
-  function (error) {
-    res.status(200).end();
-  });
-});
 
-/* DELETE /api/users/:id
+/* DELETE /api/queues/:id
  * Allows an Admin to delete a user
  */
 router.delete('/:id', function(req, res, next) {
   var vld = req.validator;
 
   if (vld.checkAdmin()) {
-    req.db.users.destroy({where: {id: req.params.id}})
+    req.db.queues.destroy({where: {id: req.params.id}})
     .then(user => {
         res.json({
             status: "success"

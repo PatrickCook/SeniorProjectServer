@@ -30,6 +30,8 @@ module.exports = (sequelize, DataTypes) => {
     Queues.hasMany(models.songs, {
       foreignKey: 'queueId'
     });
+
+    Queues.belongsToMany(models.users, {through: 'UserQueue'});
   };
   return Queues;
 };

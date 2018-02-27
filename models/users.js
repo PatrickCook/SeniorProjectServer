@@ -36,6 +36,8 @@ module.exports = (sequelize, DataTypes) => {
     Users.hasMany(models.songs, {
       foreignKey: 'userId'
     });
+
+    Users.belongsToMany(models.queues, {through: 'UserQueue'});
   };
   return Users;
 };

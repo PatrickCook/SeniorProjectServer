@@ -1,11 +1,11 @@
 'use strict';
 module.exports = (sequelize, DataTypes) => {
-  var Song = sequelize.define('Songs', {
+  var Songs = sequelize.define('Songs', {
     id: {
-      type: DataTypes.UUID,
+      allowNull: false,
+      autoIncrement: true,
       primaryKey: true,
-      defaultValue: DataTypes.UUIDV4,
-      allowNull: false
+      type: DataTypes.INTEGER
     },
     user_id: {
       type: DataTypes.UUID,
@@ -15,17 +15,21 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.UUID,
       allowNull: false
     },
-    spotify_uri: DataTypes.STRING,
     votes: DataTypes.INTEGER,
-    created_at: {
-      type: DataTypes.DATE,
-      allowNull: false
+    spotify_uri: {
+      type: DataTypes.STRING
     },
-    updated_at:  DataTypes.DATE,
-    deleted_at: DataTypes.DATE
-  }, {
-    underscored: true
-  });
-
-  return Song;
+    createdAt: {
+      allowNull: false,
+      type: DataTypes.DATE
+    },
+    updatedAt: {
+      allowNull: false,
+      type: DataTypes.DATE
+    }
+  }, {});
+  Songs.associate = function(models) {
+    // associations can be defined here
+  };
+  return Songs;
 };

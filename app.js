@@ -5,7 +5,7 @@ var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 
 
-var db = require('./config/db.js')
+var db = require('./models/index.js')
 var Validator = require('./router/Validator.js');
 
 var app = express();
@@ -35,31 +35,35 @@ app.use(function(req, res, next) {
 app.use('/api/users', require('./router/routes/users.js'));
 
 app.delete('/api/DB', function(req, res) {
+  db.sequelize.transaction(function(t) {
+    var options = { raw: true, transaction: t }
 
-  db.songs.destroy({
-    where: {},
-    truncate: true
+    return db.sequelize
+      .query('SET FOREIGN_KEY_CHECKS = 0', options)
+      .then(function() {
+        return db.sequelize.query('truncate table songs', options)
+      })
+      .then(function() {
+        return db.sequelize.query('truncate table users', options)
+      })
+      .then(function() {
+        return db.sequelize.query('truncate table queues', options)
+      })
+      .then(function() {
+        return db.sequelize.query('SET FOREIGN_KEY_CHECKS = 1', options)
+      })
+  }).then(function() {
+    db.users.create({
+      username: "admin",
+      first_name: "Patrick",
+      last_name: "Cook",
+      role: "admin",
+      created_at: new Date()
+    })
+    .then(user => {
+      res.json(user);
+    });
   })
-  db.users.destroy({
-    where: {},
-    truncate: true
-  })
-
-  db.queues.destroy({
-    where: {},
-    truncate: true
-  })
-
-  db.users.create({
-    username: "admin",
-    first_name: "Patrick",
-    last_name: "Cook",
-    role: "admin",
-    created_at: new Date()
-  })
-  .then(user => {
-    res.json(user);
-  });
 })
 
 // catch 404 and forward to error handler

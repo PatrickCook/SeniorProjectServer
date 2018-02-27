@@ -1,19 +1,23 @@
 'use strict';
 module.exports = {
   up: (queryInterface, Sequelize) => {
-    return queryInterface.createTable('Songs', {
+    return queryInterface.createTable('Queues', {
       id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      spotify_uri: {
-        type: Sequelize.STRING
+      name: {
+        type: Sequelize.STRING,
+        required: true
       },
-      votes: {
-        type: Sequelize.INT
-      },
+      cur_members: Sequelize.INTEGER,
+      max_members: Sequelize.INTEGER,
+      cur_songs: Sequelize.INTEGER,
+      max_songs: Sequelize.INTEGER,
+      private: Sequelize.INTEGER,
+      password: Sequelize.STRING,
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE
@@ -25,6 +29,6 @@ module.exports = {
     });
   },
   down: (queryInterface, Sequelize) => {
-    return queryInterface.dropTable('Songs');
+    return queryInterface.dropTable('Queues');
   }
 };

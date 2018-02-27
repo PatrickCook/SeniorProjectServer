@@ -1,11 +1,11 @@
 'use strict';
 module.exports = (sequelize, DataTypes) => {
-  var Queue = sequelize.define('Queues', {
+  var Queues = sequelize.define('Queues', {
     id: {
-      type: DataTypes.UUID,
+      allowNull: false,
+      autoIncrement: true,
       primaryKey: true,
-      defaultValue: DataTypes.UUIDV4,
-      allowNull: false
+      type: DataTypes.INTEGER
     },
     name: {
       type: DataTypes.STRING,
@@ -17,15 +17,17 @@ module.exports = (sequelize, DataTypes) => {
     max_songs: DataTypes.INTEGER,
     private: DataTypes.INTEGER,
     password: DataTypes.STRING,
-    created_at: {
-      type: DataTypes.DATE,
-      allowNull: false
+    createdAt: {
+      allowNull: false,
+      type: DataTypes.DATE
     },
-    updated_at:  DataTypes.DATE,
-    deleted_at: DataTypes.DATE
-  }, {
-    underscored: true
-  });
-
-  return Queue;
+    updatedAt: {
+      allowNull: false,
+      type: DataTypes.DATE
+    }
+  }, {});
+  Queues.associate = function(models) {
+    // associations can be defined here
+  };
+  return Queues;
 };

@@ -10,7 +10,9 @@ router.baseURL = '/api/users'
  * Requires admin permissions to receive all users or returns just the AU
  */
 router.get('/', function(req, res, next) {
-  res.json("Get list of users");
+  req.db.users.findAll().then(users => {
+      res.json(users).status(200).end()
+  });
 });
 
 /* POST /api/users/
@@ -26,12 +28,16 @@ router.post('/', function(req, res, next) {
   async.waterfall([
   function(cb) {
     if (vld.hasFields(body, ["username", "first_name", "last_name", "role"], cb)) {
-      req.db.users.create({
-        username: body.username,
-        first_name: body.first_name,
-        last_name: body.last_name,
-        role: body.role,
-        created_at: new Date()
+      req.db.users.findOrCreate({
+        where: {
+          username: body.username
+        },
+        defaults: {
+          username: body.username,
+          first_name: body.first_name,
+          last_name: body.last_name,
+          role: body.role,
+        }
       })
       .then(user => {
         res.json(user);

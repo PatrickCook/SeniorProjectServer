@@ -1,11 +1,11 @@
 'use strict';
 module.exports = (sequelize, DataTypes) => {
-  var User = sequelize.define('Users', {
+  var Users = sequelize.define('Users', {
     id: {
-      type: DataTypes.UUID,
+      allowNull: false,
+      autoIncrement: true,
       primaryKey: true,
-      defaultValue: DataTypes.UUIDV4,
-      allowNull: false
+      type: DataTypes.INTEGER
     },
     username: {
       type: DataTypes.STRING,
@@ -15,18 +15,21 @@ module.exports = (sequelize, DataTypes) => {
     last_name: DataTypes.STRING,
     role: {
       type: DataTypes.ENUM,
-      values: ['user', 'admin', 'disabled']
+      values: ['user', 'admin', 'disabled'],
+      required: true
     },
     password_hash: DataTypes.STRING,
-    created_at: {
-      type: DataTypes.DATE,
-      allowNull: false
+    createdAt: {
+      allowNull: false,
+      type: DataTypes.DATE
     },
-    updated_at:  DataTypes.DATE,
-    deleted_at: DataTypes.DATE
-  }, {
-    underscored: true
-  });
-
-  return User;
+    updatedAt: {
+      allowNull: false,
+      type: DataTypes.DATE
+    }
+  }, {});
+  Users.associate = function(models) {
+    // associations can be defined here
+  };
+  return Users;
 };

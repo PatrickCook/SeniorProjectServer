@@ -24,11 +24,7 @@ fs
     db[model.name] = model;
   });
 
-Object.keys(db).forEach(modelName => {
-  if (db[modelName].associate) {
-    db[modelName].associate(db);
-  }
-});
+
 
 db.sequelize = sequelize;
 db.Sequelize = Sequelize;
@@ -38,10 +34,11 @@ db.users = require('../models/users.js')(sequelize, Sequelize);
 db.songs = require('../models/songs.js')(sequelize, Sequelize);
 db.queues = require('../models/queues.js')(sequelize, Sequelize);
 
-/* Setup database relations */
-db.songs.belongsTo(db.queues);
-db.queues.hasMany(db.songs);
-db.queues.belongsTo(db.users);
-db.users.hasMany(db.queues);
+
+Object.keys(db).forEach(modelName => {
+  if (db[modelName].associate) {
+    db[modelName].associate(db);
+  }
+});
 
 module.exports = db;

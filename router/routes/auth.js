@@ -2,18 +2,12 @@ var express = require('express');
 var async = require('async');
 var sessionUtil = require('../Session.js');
 var Tags = require('../Validator.js').Tags;
+var AllowedFields = require('../Validator.js').AllowedFields;
+var RequiredFields = require('../Validator.js').RequiredFields;
 
 var router = express.Router();
 
 router.baseURL = '/api/auth'
-
-const AllowedFields = {
-  postAuth: ['username', 'password_hash']
-}
-
-const RequiredFields = {
-  postAuth: ['username', 'password_hash']
-}
 
 
 router.post('/', function(req, res, next) {
@@ -27,19 +21,22 @@ router.post('/', function(req, res, next) {
     if (vld.allowOnlyFields(body, AllowedFields.postAuth, cb) &&
         vld.hasFields(body, RequiredFields.postAuth, cb)) {
 
-      db.users.findOne({
-        where: {
-          username: body.username
-        }
-      })
+      db.users.findOne({ where: {username: body.username }})
       .then(result => {
         console.log(result.password_hash, body.password_hash)
         if (vld.check(result &&
          result.password_hash === body.password_hash, Tags.badLogin, null, cb)) {
           cookie = sessionUtil.makeSession(result, res);
+
           res.location(router.baseURL + '/' + cookie).status(200).end();
         }
       })
+      .catch(error => {
+          res.json({
+            status: "error",
+            error: error
+          })
+      });
     }
   }],
   function (error) {

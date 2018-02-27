@@ -15,7 +15,7 @@ module.exports = (sequelize, DataTypes) => {
     max_members: DataTypes.INTEGER,
     cur_songs: DataTypes.INTEGER,
     max_songs: DataTypes.INTEGER,
-    private: DataTypes.INTEGER,
+    private: DataTypes.BOOLEAN,
     password: DataTypes.STRING,
     createdAt: {
       allowNull: false,
@@ -27,7 +27,9 @@ module.exports = (sequelize, DataTypes) => {
     }
   }, {});
   Queues.associate = function(models) {
-    // associations can be defined here
+    Queues.hasMany(models.songs, {
+      foreignKey: 'queueId'
+    });
   };
   return Queues;
 };

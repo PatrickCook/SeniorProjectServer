@@ -29,7 +29,13 @@ module.exports = (sequelize, DataTypes) => {
     }
   }, {});
   Users.associate = function(models) {
-    // associations can be defined here
+    Users.hasMany(models.queues, {
+      foreignKey: 'owner'
+    });
+
+    Users.hasMany(models.songs, {
+      foreignKey: 'userId'
+    });
   };
   return Users;
 };

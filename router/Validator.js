@@ -25,6 +25,24 @@ Validator.Tags = {
    queryFailed: "queryFailed"
 };
 
+Validator.AllowedFields = {
+  postAuth: ['username', 'password_hash'],
+  putUser: ["username", "first_name", "last_name", "password_hash"],
+  postUser: ["username", "first_name", "last_name", "password_hash", "role"],
+  postQueue: ["name", "private", "password"]
+}
+
+Validator.RequiredFields = {
+  postAuth: ['username', 'password_hash'],
+  postUser: ["username", "first_name", "last_name", "password_hash"],
+  postQueue: ["name", "private"]
+}
+
+Validator.MaxFields = {
+  QUEUE_SONGS: 20,
+  QUEUE_MEMBERS: 20
+}
+
 
 // Check |test|.  If false, add an error with tag and possibly empty array
 // of qualifying parameters, e.g. name of missing field if tag is
@@ -89,7 +107,8 @@ Validator.prototype.hasFields = function(obj, fieldList, cb) {
    var self = this;
 
    fieldList.forEach(function(name) {
-      self.chain(obj.hasOwnProperty(name), Validator.Tags.missingField, [name]);
+      self.chain(obj.hasOwnProperty(name),
+       Validator.Tags.missingField, [name]);
    });
 
    return this.check(true, null, null, cb);

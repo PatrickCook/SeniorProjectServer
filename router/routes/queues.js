@@ -3,23 +3,25 @@ var async = require('async');
 var Tags = require('../Validator.js').Tags;
 var AllowedFields = require('../Validator.js').AllowedFields;
 var RequiredFields = require('../Validator.js').RequiredFields;
+var MaxFields = require('../Validator.js').MaxFields;
 
 var router = express.Router();
 
-router.baseURL = '/api/users'
+router.baseURL = '/api/queues'
 
 /* GET /api/users/
  * Get list of users.
  * Requires admin permissions to receive all users or returns just the AU
  */
 router.get('/', function(req, res, next) {
-  req.db.users.findAll({
-    attributes: ['id', 'username', 'first_name', 'last_name']
+  req.db.queues.findAll({
+    attributes: ['id', 'owner', 'name', 'max_members', 'max_songs',
+                 'private', 'createdAt', 'updatedAt']
   })
-  .then(users => {
+  .then(queues => {
       res.json({
           status: "success",
-          data: users
+          data: queues
       }).status(200).end()
   })
   .catch(error => {
@@ -40,37 +42,32 @@ router.get('/', function(req, res, next) {
 router.post('/', function(req, res, next) {
   let body = req.body
   let vld = req.validator
-
+  console.log("Private", !body.private)
   async.waterfall([
   function(cb) {
-    if (vld.hasFields(body, RequiredFields.postUser, cb) &&
-        vld.allowOnlyFields(body, AllowedFields.postUser, cb) &&
-        vld.check(body.role != 'admin', Tags.noPermission, cb)) {
+    if (vld.hasFields(body, RequiredFields.postQueue, cb) &&
+        vld.allowOnlyFields(body, AllowedFields.postQueue, cb) &&
+        vld.check(!body.private|| (body.private && body.password), Tags.missingField, ["password"], cb)) {
 
-      req.db.users.findOrCreate({
+      let password = body.password ? body.password : null;
+      req.db.queues.findOrCreate({
         where: {
-          username: body.username
+          owner: req.session.id,
+          name: body.name
         },
         defaults: {
-          username: body.username,
-          first_name: body.first_name,
-          last_name: body.last_name,
-          role: body.role,
-          password_hash: body.password_hash
+          name: body.name,
+          owner: req.session.id,
+          private: body.private,
+          password: body.password ? body.password : null,
+          cur_members: 0,
+          max_members: MaxFields.QUEUE_MEMBERS,
+          cur_songs: 0,
+          max_songs: MaxFields.QUEUE_SONGS
         }
       })
-      .then(user => {
-          res.json({
-              status: "success",
-              data: {
-                id: user[0].id,
-                username: user[0].username,
-                first_name: user[0].first_name,
-                last_name: user[0].last_name,
-                role: user[0].role
-
-              }
-          }).status(200).end()
+      .then(queue => {
+          res.json(queue).status(200).end()
       })
       .catch(error => {
           res.json({

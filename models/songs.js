@@ -29,7 +29,7 @@ module.exports = (sequelize, DataTypes) => {
     }
   }, {});
   Songs.associate = function(models) {
-    // associations can be defined here
+
   };
   return Songs;
 };

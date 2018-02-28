@@ -1,6 +1,6 @@
 'use strict';
 module.exports = (sequelize, DataTypes) => {
-  var Queues = sequelize.define('Queues', {
+  var Queue = sequelize.define('Queue', {
     id: {
       allowNull: false,
       autoIncrement: true,
@@ -25,13 +25,15 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false,
       type: DataTypes.DATE
     }
-  }, {});
-  Queues.associate = function(models) {
-    Queues.hasMany(models.songs, {
+  }, {
+    freezeTableName: true
+  });
+  Queue.associate = function(models) {
+    Queue.hasMany(models.song, {
       foreignKey: 'queueId'
     });
 
-    Queues.belongsToMany(models.users, {through: 'UserQueue'});
+    Queue.belongsToMany(models.user, {through: 'UserQueue'});
   };
-  return Queues;
+  return Queue;
 };

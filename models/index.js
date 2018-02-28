@@ -30,9 +30,9 @@ db.sequelize = sequelize;
 db.Sequelize = Sequelize;
 
 /* /Models/tables */
-db.users = require('../models/users.js')(sequelize, Sequelize);
-db.songs = require('../models/songs.js')(sequelize, Sequelize);
-db.queues = require('../models/queues.js')(sequelize, Sequelize);
+db.user = require('../models/user.js')(sequelize, Sequelize);
+db.song = require('../models/song.js')(sequelize, Sequelize);
+db.queue = require('../models/queue.js')(sequelize, Sequelize);
 
 
 Object.keys(db).forEach(modelName => {

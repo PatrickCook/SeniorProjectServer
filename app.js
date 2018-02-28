@@ -30,7 +30,7 @@ app.use(Session.router);
 /* Add validator and database utilities to request */
 app.use(function(req, res, next) {
   if (req.session || req.method === 'POST' &&
-   (req.path === '/api/users/' || req.path === '/api/auth/')) {
+   (req.path === '/api/user/' || req.path === '/api/auth/')) {
     req.validator = new Validator(req, res);
     req.db = db;
     next();
@@ -40,8 +40,9 @@ app.use(function(req, res, next) {
 })
 
 app.use('/api/auth', require('./router/routes/auth.js'));
-app.use('/api/users', require('./router/routes/users.js'));
-app.use('/api/queues', require('./router/routes/queues.js'));
+app.use('/api/user', require('./router/routes/users.js'));
+app.use('/api/queue', require('./router/routes/queues.js'));
+app.use('/api/queue', require('./router/routes/songs.js'));
 
 app.delete('/api/DB', function(req, res) {
   db.sequelize.transaction(function(t) {
@@ -50,19 +51,19 @@ app.delete('/api/DB', function(req, res) {
     return db.sequelize
       .query('SET FOREIGN_KEY_CHECKS = 0', options)
       .then(function() {
-        return db.sequelize.query('truncate table songs', options)
+        return db.sequelize.query('truncate table song', options)
       })
       .then(function() {
-        return db.sequelize.query('truncate table users', options)
+        return db.sequelize.query('truncate table user', options)
       })
       .then(function() {
-        return db.sequelize.query('truncate table queues', options)
+        return db.sequelize.query('truncate table queue', options)
       })
       .then(function() {
         return db.sequelize.query('SET FOREIGN_KEY_CHECKS = 1', options)
       })
   }).then(function() {
-    db.users.bulkCreate([{
+    db.user.bulkCreate([{
       username: "admin",
       first_name: "Patrick",
       last_name: "Cook",

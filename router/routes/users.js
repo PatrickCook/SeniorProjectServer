@@ -13,7 +13,7 @@ router.baseURL = '/api/users'
  * Requires admin permissions to receive all users or returns just the AU
  */
 router.get('/', function(req, res, next) {
-  req.db.users.findAll({
+  req.db.user.findAll({
     attributes: ['id', 'username', 'first_name', 'last_name']
   })
   .then(users => {
@@ -47,7 +47,7 @@ router.post('/', function(req, res, next) {
         vld.allowOnlyFields(body, AllowedFields.postUser, cb) &&
         vld.check(body.role != 'admin', Tags.noPermission, cb)) {
 
-      req.db.users.findOrCreate({
+      req.db.user.findOrCreate({
         where: {
           username: body.username
         },
@@ -93,7 +93,7 @@ router.post('/', function(req, res, next) {
  * Returns list of groups a user is part of
  */
 router.get('/:id', function(req, res, next) {
-  req.db.users.findOne({
+  req.db.user.findOne({
     where: {
       id: req.params.id
     },
@@ -119,7 +119,7 @@ router.put('/:id', function(req, res, next) {
   async.waterfall([
   function(cb) {
     if (vld.allowOnlyFields(body, AllowedFields.putUser, cb)) {
-      req.db.users.update(body, { where: {id: req.params.id }})
+      req.db.user.update(body, { where: {id: req.params.id }})
       .then(user => {
         res.json({
           status: "success",
@@ -147,7 +147,7 @@ router.delete('/:id', function(req, res, next) {
   var vld = req.validator;
 
   if (vld.checkAdmin()) {
-    req.db.users.destroy({where: {id: req.params.id}})
+    req.db.user.destroy({where: {id: req.params.id}})
     .then(user => {
         res.json({
             status: "success"

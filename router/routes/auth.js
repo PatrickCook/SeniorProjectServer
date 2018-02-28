@@ -21,7 +21,7 @@ router.post('/', function(req, res, next) {
     if (vld.allowOnlyFields(body, AllowedFields.postAuth, cb) &&
         vld.hasFields(body, RequiredFields.postAuth, cb)) {
 
-      db.users.findOne({ where: {username: body.username }})
+      db.user.findOne({ where: {username: body.username }})
       .then(result => {
         console.log(result.password_hash, body.password_hash)
         if (vld.check(result &&

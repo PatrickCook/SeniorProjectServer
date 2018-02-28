@@ -22,7 +22,7 @@ router.get('/', function(req, res, next) {
   if (req.query.name)
     filter.name = req.query.name
 
-  req.db.queues.findAll({
+  req.db.queue.findAll({
     where: filter,
     attributes: ['id', 'owner', 'name', 'max_members', 'max_songs',
                  'private', 'createdAt', 'updatedAt']
@@ -59,7 +59,7 @@ router.post('/', function(req, res, next) {
         vld.check(!body.private|| (body.private && body.password), Tags.missingField, ["password"], cb)) {
 
       let password = body.password ? body.password : null;
-      req.db.queues.findOrCreate({
+      req.db.queue.findOrCreate({
         where: {
           owner: req.session.id,
           name: body.name
@@ -92,23 +92,30 @@ router.post('/', function(req, res, next) {
   });
 });
 
-/* GET /api/users/:id
+/* GET /api/queues/:id
  * Allows an admin to receive information on a user.
  * If not admin returns AU info regardless of id given
  * Body Response: {id, username, [groups]}
  * Returns list of groups a user is part of
  */
 router.get('/:id', function(req, res, next) {
-  req.db.users.findOne({
-    where: {
-      id: req.params.id
-    },
-    attributes: ['username', 'first_name', 'last_name']
+  req.db.queue.findAll({
+    where: {id: req.params.id },
+    attributes: ['id', 'owner', 'name', 'max_members', 'max_songs',
+                 'private', 'createdAt', 'updatedAt']
   })
-  .then(user => {
-    if (user)
-      res.json(user);
-    res.status(404).json("User not found")
+  .then(queues => {
+      res.json({
+          status: "success",
+          data: queues
+      }).status(200).end()
+  })
+  .catch(error => {
+      res.json({
+        status: "error",
+        error: error,
+        data: []
+      })
   });
 });
 
@@ -120,8 +127,8 @@ router.get('/:id', function(req, res, next) {
 router.delete('/:id', function(req, res, next) {
   var vld = req.validator;
 
-  if (vld.checkAdmin()) {
-    req.db.queues.destroy({where: {id: req.params.id}})
+  if (vld.checkPrsOK(req.session.id)) {
+    req.db.queue.destroy({where: {id: req.params.id}})
     .then(user => {
         res.json({
             status: "success"

@@ -1,19 +1,11 @@
 'use strict';
 module.exports = (sequelize, DataTypes) => {
-  var Songs = sequelize.define('Songs', {
+  var Song = sequelize.define('Song', {
     id: {
       allowNull: false,
       autoIncrement: true,
       primaryKey: true,
       type: DataTypes.INTEGER
-    },
-    user_id: {
-      type: DataTypes.UUID,
-      allowNull: false
-    },
-    queue_id: {
-      type: DataTypes.UUID,
-      allowNull: false
     },
     votes: DataTypes.INTEGER,
     spotify_uri: {
@@ -27,9 +19,11 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false,
       type: DataTypes.DATE
     }
-  }, {});
-  Songs.associate = function(models) {
+  }, {
+    freezeTableName: true
+  });
+  Song.associate = function(models) {
 
   };
-  return Songs;
+  return Song;
 };

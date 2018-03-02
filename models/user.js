@@ -32,14 +32,20 @@ module.exports = (sequelize, DataTypes) => {
   });
   User.associate = function(models) {
     User.hasMany(models.queue, {
-      foreignKey: 'owner'
+      foreignKey: 'owner',
+      onDelete: 'CASCADE'
+
     });
 
     User.hasMany(models.song, {
-      foreignKey: 'userId'
+      foreignKey: 'userId',
+      onDelete: 'CASCADE'
     });
 
-    User.belongsToMany(models.queue, {through: 'UserQueue'});
+    User.belongsToMany(models.queue, {
+      through: 'UserQueue',
+      onDelete: 'CASCADE'
+    });
   };
   return User;
 };

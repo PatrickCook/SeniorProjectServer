@@ -2,7 +2,7 @@
   "development": {
     "username": "root",
     "password": "Gibson1957@",
-    "database": "restapi_development",
+    "database": "queueit_dev",
     "host": "127.0.0.1",
     "dialect": "mysql"
   },

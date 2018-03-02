@@ -14,7 +14,6 @@ router.post('/', function(req, res, next) {
   let body = req.body;
   let db = req.db;
   let vld = req.validator;
-  console.log("Auth POST")
 
   async.waterfall([
   function(cb) {
@@ -32,9 +31,9 @@ router.post('/', function(req, res, next) {
         }
       })
       .catch(error => {
-          res.json({
+          res.status(404).json({
             status: "error",
-            error: error
+            error: "user not found"
           })
       });
     }

@@ -76,7 +76,7 @@ router.post('/', function(req, res, next) {
         }
       })
       .then(queue => {
-          res.json(queue).status(200).end()
+          res.json(queue[0]).status(200).end()
       })
       .catch(error => {
           res.json({

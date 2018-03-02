@@ -6,7 +6,7 @@ var RequiredFields = require('../Validator.js').RequiredFields;
 
 var router = express.Router();
 
-router.baseURL = '/api/queues'
+router.baseURL = '/api/songs'
 
 /* GET /api/users/
  * Get list of users.
@@ -33,15 +33,9 @@ router.baseURL = '/api/queues'
 
 
 router.get('/:id/songs', function(req, res, next) {
-  req.db.queue.findOne({where: {id: req.params.id}})
-  .then(queue => {
-    if (queue) {
-      queue.getSongs().then(songs => {
-        res.json({ status: "success", data: songs})
-      })
-    } else {
-      res.json({ status: "succcess", data: []})
-    }
+  req.db.songs.findOne({where: {id: req.params.id}})
+  .then(song => {
+      res.json({ status: "success", data: song})
   })
   .catch(error => {
       res.json({

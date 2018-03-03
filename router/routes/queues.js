@@ -25,20 +25,18 @@ router.get('/', function(req, res, next) {
   req.db.queue.findAll({
     where: filter,
     attributes: ['id', 'owner', 'name', 'max_members', 'max_songs',
-                 'private', 'createdAt', 'updatedAt']
+                 'private', 'createdAt', 'updatedAt'],
+    include: [{
+      model: req.db.user,
+      attributes: ["id", "username", "first_name", "last_name"],
+      through: { attributes: [] }
+    }]
   })
   .then(queues => {
-      res.json({
-          status: "success",
-          data: queues
-      }).status(200).end()
+      res.json({ status: "success", data: queues }).status(200).end()
   })
   .catch(error => {
-      res.json({
-        status: "error",
-        error: error,
-        data: []
-      })
+      res.json({status: "error", error: error, data: []})
   });
 });
 
@@ -51,74 +49,79 @@ router.get('/', function(req, res, next) {
 router.post('/', function(req, res, next) {
   let body = req.body
   let vld = req.validator
-  console.log("Private", !body.private)
-  async.waterfall([
-  function(cb) {
-    if (vld.hasFields(body, RequiredFields.postQueue, cb) &&
-        vld.allowOnlyFields(body, AllowedFields.postQueue, cb) &&
-        vld.check(!body.private|| (body.private && body.password), Tags.missingField, ["password"], cb)) {
 
-      let password = body.password ? body.password : null;
-      req.db.queue.findOrCreate({
-        where: {
-          owner: req.session.id,
-          name: body.name
-        },
-        defaults: {
-          name: body.name,
-          owner: req.session.id,
-          private: body.private,
-          password: body.password ? body.password : null,
-          cur_members: 0,
-          max_members: MaxFields.QUEUE_MEMBERS,
-          cur_songs: 0,
-          max_songs: MaxFields.QUEUE_SONGS
-        }
+  if (vld.hasFields(body, RequiredFields.postQueue, null) &&
+      vld.allowOnlyFields(body, AllowedFields.postQueue, null) &&
+      vld.check(!body.private|| (body.private && body.password),
+       Tags.missingField, ["password"], null)) {
+
+    let password = body.password ? body.password : null;
+    req.db.queue.findOrCreate({
+      where: {
+        owner: req.session.id,
+        name: body.name
+      },
+      defaults: {
+        name: body.name,
+        owner: req.session.id,
+        private: body.private,
+        password: body.password ? body.password : null,
+        cur_members: 0,
+        max_members: MaxFields.QUEUE_MEMBERS,
+        cur_songs: 0,
+        max_songs: MaxFields.QUEUE_SONGS
+      }
+    })
+    .then(queue => {
+      req.db.user.findOne({where: {id: req.session.id}})
+      .then(user => {
+        queue[0].addUser(user)
+        .then(result => res.json({status: "success", data: queue[0]}))
+      })
+    })
+  }
+});
+
+
+router.get('/:id', function(req, res, next) {
+  var vld = req.validator;
+  var queueId = req.params.id
+  var userId = req.session.id
+
+  req.db.sequelize.query(`SELECT COUNT(*) as allowed FROM UserQueue ` +
+                          `WHERE QueueId=${queueId} AND UserId=${userId}`)
+  .spread((result, metadata) => {
+    if (result[0].allowed || vld.checkAdmin()) {
+      req.db.queue.findAll({
+        where: {id: req.params.id},
+        attributes: ['id', 'owner', 'name', 'max_members', 'max_songs',
+                     'private', 'createdAt', 'updatedAt'],
+        include: [{
+          model: req.db.user,
+          attributes: ["id", "username", "first_name", "last_name"],
+          through: { attributes: [] }
+        }, {
+          model: req.db.song
+        }]
       })
       .then(queue => {
-          res.json(queue[0]).status(200).end()
-      })
-      .catch(error => {
-          res.json({
+        if (queue.length)
+          res.status(200).json({ status: "success", data: queue })
+        else
+          res.status(404).json({
             status: "error",
-            error: error,
+            error: "Queue does not exist",
             data: []
           })
-      });
-    }
-  }],
-  function (error) {
-    res.status(200).end();
-  });
-});
-
-/* GET /api/queues/:id
- * Allows an admin to receive information on a user.
- * If not admin returns AU info regardless of id given
- * Body Response: {id, username, [groups]}
- * Returns list of groups a user is part of
- */
-router.get('/:id', function(req, res, next) {
-  req.db.queue.findAll({
-    where: {id: req.params.id },
-    attributes: ['id', 'owner', 'name', 'max_members', 'max_songs',
-                 'private', 'createdAt', 'updatedAt']
-  })
-  .then(queues => {
-      res.json({
-          status: "success",
-          data: queues
-      }).status(200).end()
-  })
-  .catch(error => {
-      res.json({
-        status: "error",
-        error: error,
-        data: []
       })
+    } else {
+      res.status(404).json({
+        status: "error",
+        error: "user is not member of queue",
+        data: []})
+    }
   });
 });
-
 
 
 /* DELETE /api/queues/:id
@@ -130,16 +133,10 @@ router.delete('/:id', function(req, res, next) {
   if (vld.checkPrsOK(req.session.id)) {
     req.db.queue.destroy({where: {id: req.params.id}})
     .then(user => {
-        res.json({
-            status: "success"
-        }).status(200).end()
+        res.json({ status: "success" }).status(200).end()
     })
     .catch(error => {
-        res.json({
-          status: "error",
-          error: error,
-          data: []
-        })
+        res.json({ status: "error", error: error, data: [] })
     });
   }
 });

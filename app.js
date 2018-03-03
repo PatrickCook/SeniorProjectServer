@@ -29,8 +29,8 @@ app.use(cookieParser());
 app.use(Session.router);
 /* Add validator and database utilities to request */
 app.use(function(req, res, next) {
-  if (req.session || req.method === 'POST' &&
-   (req.path === '/api/user/' || req.path === '/api/auth/')) {
+  if (req.session || (req.method === 'POST' &&
+   (req.path === '/api/user' || req.path === '/api/auth'))) {
     req.validator = new Validator(req, res);
     req.db = db;
     next();
@@ -43,6 +43,7 @@ app.use('/api/auth', require('./router/routes/auth.js'));
 app.use('/api/user', require('./router/routes/users.js'));
 app.use('/api/queue', require('./router/routes/queues.js'));
 app.use('/api/queue', require('./router/routes/songs.js'));
+app.use('/api/queue', require('./router/routes/members.js'));
 
 app.delete('/api/DB', function(req, res) {
   db.sequelize.transaction(function(t) {

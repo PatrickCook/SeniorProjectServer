@@ -6,29 +6,34 @@ var RequiredFields = require('../Validator.js').RequiredFields;
 
 var router = express.Router();
 
-router.baseURL = '/api/songs'
+router.baseURL = '/api/queue'
 
-/* GET /api/users/
- * Get list of users.
- * Requires admin permissions to receive all users or returns just the AU
+/*
+ * ALlows user to add song to a queue
  */
  router.post('/:id/songs', function(req, res, next) {
-   req.db.queue.findOne({where: {id: req.params.id}})
-   .then(queue => {
-     queue.createSong({
-       votes: 0,
-       spotify_uri: "testURI",
-       userId: req.session.id
-     })
-     res.json({status: "success", msg: "song added to queue"}).end();
-   })
-   .catch(error => {
-       res.json({
-         status: "error",
-         error: error,
-         data: []
+   var vld = req.validator;
+   var queueId = req.params.id
+   var userId = req.session.id
+
+   req.db.sequelize.query(`SELECT COUNT(*) as allowed FROM UserQueue ` +
+                           `WHERE QueueId=${queueId} AND UserId=${userId}`)
+   .spread((result, metadata) => {
+     if (result[0].allowed || vld.checkAdmin()) {
+       req.db.queue.findOne({where: {id: queueId}})
+       .then(queue => {
+         queue.createSong({ spotify_uri: "testURI", userId: userId})
+         .then(song => {
+           res.json({status: "success", data: song})
+         })
        })
-   });
+     } else {
+       res.status(401).json({
+         status: "error",
+         error: "user not member of queue"
+       })
+     }
+   })
  });
 
 
@@ -38,11 +43,7 @@ router.get('/:id/songs', function(req, res, next) {
       res.json({ status: "success", data: song})
   })
   .catch(error => {
-      res.json({
-        status: "error",
-        error: error,
-        data: []
-      })
+      res.json({ status: "error", error: error })
   });
 });
 
@@ -52,22 +53,27 @@ router.get('/:id/songs', function(req, res, next) {
  */
 router.delete('/:id/songs/:songId', function(req, res, next) {
   var vld = req.validator;
+  var queueId = req.params.id
+  var userId = req.session.id
 
-  if (vld.checkAdmin()) {
-    req.db.song.destroy({where: {id: req.params.id}})
-    .then(user => {
-        res.json({
-            status: "success"
-        }).status(200).end()
-    })
-    .catch(error => {
-        res.json({
-          status: "error",
-          error: error,
-          data: []
-        })
-    });
-  }
+  req.db.sequelize.query(`SELECT COUNT(*) as allowed FROM UserQueue ` +
+                          `WHERE QueueId=${queueId} AND UserId=${userId}`)
+  .spread((result, metadata) => {
+    if (result[0].allowed || vld.checkAdmin()) {
+      req.db.song.destroy({where: {id: req.params.id}})
+      .then(user => {
+          res.json({ status: "success" }).status(200).end()
+      })
+      .catch(error => {
+          res.json({ status: "error", error: error })
+      });
+    } else {
+      res.status(401).json({
+        status: "error",
+        error: "user not member of queue"
+      })
+    }
+  })
 });
 
 module.exports = router;

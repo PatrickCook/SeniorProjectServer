@@ -41,62 +41,36 @@ router.post('/', function(req, res, next) {
   let body = req.body
   let vld = req.validator
 
-  async.waterfall([
-  function(cb) {
-    if (vld.hasFields(body, RequiredFields.postUser, cb) &&
-        vld.allowOnlyFields(body, AllowedFields.postUser, cb) &&
-        vld.check(body.role != 'admin', Tags.noPermission, cb)) {
+  if (vld.hasFields(body, RequiredFields.postUser, null) &&
+      vld.allowOnlyFields(body, AllowedFields.postUser, null) &&
+      vld.check(body.role != 'admin', Tags.noPermission, null)) {
 
-      req.db.user.findOrCreate({
-        where: {
-          username: body.username
-        },
-        defaults: {
-          username: body.username,
-          first_name: body.first_name,
-          last_name: body.last_name,
-          role: body.role,
-          password_hash: body.password_hash
-        }
-      })
-      .then(user => {
-          res.json({
-              status: "success",
-              data: {
-                id: user[0].id,
-                username: user[0].username,
-                first_name: user[0].first_name,
-                last_name: user[0].last_name,
-                role: user[0].role
-
-              }
-          }).status(200).end()
-      })
-      .catch(error => {
-          res.json({
-            status: "error",
-            error: error,
-            data: []
-          })
-      });
-    }
-  }],
-  function (error) {
-    res.status(200).end();
-  });
+    req.db.user.findOrCreate({
+      where: {
+        username: body.username
+      },
+      attributes: ["id", "username", "first_name", "last_name", "role"],
+      defaults: {
+        username: body.username,
+        first_name: body.first_name,
+        last_name: body.last_name,
+        role: body.role,
+        password_hash: body.password_hash
+      }
+    })
+    .then(user => {
+        res.json({
+          status: "success",
+          data: {id: user[0].id, username: user[0].username, role: user[0].role}
+        }).status(200).end()
+    })
+  }
 });
 
-/* GET /api/users/:id
- * Allows an admin to receive information on a user.
- * If not admin returns AU info regardless of id given
- * Body Response: {id, username, [groups]}
- * Returns list of groups a user is part of
- */
+
 router.get('/:id', function(req, res, next) {
   req.db.user.findOne({
-    where: {
-      id: req.params.id
-    },
+    where: { id: req.params.id },
     attributes: ['username', 'first_name', 'last_name']
   })
   .then(user => {
@@ -116,28 +90,12 @@ router.put('/:id', function(req, res, next) {
   let vld = req.validator
   console.log(req.body)
 
-  async.waterfall([
-  function(cb) {
-    if (vld.allowOnlyFields(body, AllowedFields.putUser, cb)) {
-      req.db.user.update(body, { where: {id: req.params.id }})
-      .then(user => {
-        res.json({
-          status: "success",
-          data: user
-        })
-      })
-      .catch(error => {
-          res.json({
-            status: "error",
-            error: error,
-            data: []
-          })
-      });
-    }
-  }],
-  function (error) {
-    res.status(200).end();
-  });
+  if (vld.allowOnlyFields(body, AllowedFields.putUser, null)) {
+    req.db.user.update(body, { where: {id: req.params.id }})
+    .then(user => {
+      res.json({ status: "success", data: user })
+    })
+  }
 });
 
 /* DELETE /api/users/:id

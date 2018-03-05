@@ -1,5 +1,26 @@
 # REST API - Spotify Senior Project
 
+## Getting Started
+To start the REST api clone the repo and `cd` into the directory. The `app.js` is the file used to start the server. The folder `router` contains all files corresponding with each endpoint documented below. The `models` folder contains all database model representations. Lastly, the `migrations` and `seeders` folders contain database migration and database seeding files.
+
+#### To Run:
+```
+- npm install
+- node app.js
+```
+
+#### Database Configuration
+All database Configuration code is contained in the `config` folder. Edit the following to lines to connect your database with the server.
+```
+"development": {
+  "username": "MYSQL_USERNAME",
+  "password": "MYSQL_PASSWORD",
+  "database": "DATABASE_NAME",
+  "host": "DATABASE_URL",
+  "dialect": "mysql" // Compatible with others, just google sequelize
+}
+```
+
 ### Endpoint Todos:
 * Require admin to get list of users
 * Require admin to change role of user

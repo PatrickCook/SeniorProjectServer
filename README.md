@@ -42,7 +42,7 @@ Outlined below is a list of REST API endpoints which support the following actio
 
 ## User
 
-#### GET /api/user
+### GET /api/user
 * Allows Admin to retrieve list of all users. If user is not admin only the users information is returned
 
 **Example Response:**
@@ -60,7 +60,7 @@ Outlined below is a list of REST API endpoints which support the following actio
 }
 ```
 
-#### POST /api/user
+### POST /api/user
 * Allows an unauthorized person to create a new user. Only an admin can create a user with role `admin`
 * Required Fields: `username, first_name, last_name, password_hash, role`
 * New user id is returned in the header of the response
@@ -78,7 +78,7 @@ Outlined below is a list of REST API endpoints which support the following actio
 }
 ```
 
-#### GET /api/user/:id
+### GET /api/user/:id
 * Returns the user information associated with `id` provided
 
 **Example Response:**
@@ -93,7 +93,7 @@ Outlined below is a list of REST API endpoints which support the following actio
 }
 ```
 
-#### PUT /api/user/:id
+### PUT /api/user/:id
 * Allows a user to update and of the following fields: `username, first_name, last_name, password_hash`
 
 **Example Request Body:**
@@ -113,7 +113,7 @@ Outlined below is a list of REST API endpoints which support the following actio
 }
 ```
 
-#### DELETE /api/user/:id
+### DELETE /api/user/:id
 * Allows an admin to delete a user account.
 
 **Example Response:**
@@ -126,7 +126,7 @@ Outlined below is a list of REST API endpoints which support the following actio
 
 ## Queue
 
-#### GET /api/queue [?owner=ownerId, name=ownerUserName]
+### GET /api/queue [?owner=ownerId, name=ownerUserName]
 * Allows a user to get a list of all queues. In the future this will be limited to only return queues the user is a part of.
 * An optional `owner` and `name` query parameter can be used to filter the list of queues returned.
 
@@ -163,7 +163,7 @@ Outlined below is a list of REST API endpoints which support the following actio
 }
 ```
 
-#### POST /api/queue
+### POST /api/queue
 * Allows a user to create a new queue. If the queue is marked as `private` a `password` field must be present and non-null. The user creating the queue is automatically added a member of the queue and is set as the owner. If the user has already created a queue with the same `name` then a new queue is NOT created.
 * Required Body Fields: `name, private, password`
 
@@ -187,7 +187,7 @@ Outlined below is a list of REST API endpoints which support the following actio
 }
 ```
 
-#### GET /api/queue/:id
+### GET /api/queue/:id
 * Allows the member of a queue to retrieve queue information, list of members and the list of songs currently in the queue.
 * If user is not a member of the queue or the queue does not exist the response status is `401` and `404` respectively. If user is an admin they can access all queues
 
@@ -229,7 +229,7 @@ Outlined below is a list of REST API endpoints which support the following actio
 }
 ```
 
-#### DELETE /api/queue/:id
+### DELETE /api/queue/:id
 * Allows the owner of the queue or an admin to delete a queue. Upon deletion all members are removed and all queued songs are deleted
 
 **Example Response:**
@@ -242,7 +242,7 @@ Outlined below is a list of REST API endpoints which support the following actio
 
 ## Song
 
-#### POST /api/queue/:id/songs
+### POST /api/queue/:id/songs
 * Allows the member of a queue or an admin to add a song to the list.
 * If user is not a member of the queue a response status of `401` is returned
 * Required Request Body Fields: `spotify_uri`
@@ -262,7 +262,7 @@ Outlined below is a list of REST API endpoints which support the following actio
 }
 ```
 
-#### GET /api/queue/:id/songs
+### GET /api/queue/:id/songs
 * Allows member of a queue or an admin to retrieve the song list of a given queue using the `:id` parameter
 * If user is not a member of the queue a response status of `401` is returned
 
@@ -284,7 +284,7 @@ Outlined below is a list of REST API endpoints which support the following actio
 }
 ```
 
-#### DELETE /api/queue/:id/songs/:songId
+### DELETE /api/queue/:id/songs/:songId
 * Allows member of a queue or admin to remove song `:songId` from queue `:id`
 * If the queue does not have the song a response status of `404` is returned
 * If user is not a member of the queue a response status of `401` is returned
@@ -296,14 +296,14 @@ Outlined below is a list of REST API endpoints which support the following actio
 }
 ```
 
-#### PUT /api/song/:id/vote
+### PUT /api/song/:id/vote
 * Allow a member of the queue to upvote a song. If the user is not a member of the song the queue corresponds to then a response status of `401` is returned
 * If the song has already been upvoted by the user then the upvote is ignored
 
 **Example Response:**
 TODO
 
-#### DELETE /api/song/:id/vote
+### DELETE /api/song/:id/vote
 * Allows the user who upvoted a song to retract their upvote.
 
 **Example Response:**

@@ -19,7 +19,7 @@ Outlined below is a list of REST API endpoints which support the following actio
 ##### Authentication:
 * All endpoints except `POST /api/user` and `POST /api/auth` require the user to be authenticated and to provide their session cookie with each request for verification.
 
-### User
+## User
 
 #### GET /api/user
 * Allows Admin to retrieve list of all users. If user is not admin only the users information is returned
@@ -103,7 +103,7 @@ Outlined below is a list of REST API endpoints which support the following actio
 }
 ```
 
-### Queue
+## Queue
 
 #### GET /api/queue [?owner=ownerId, name=ownerUserName]
 * Allows a user to get a list of all queues. In the future this will be limited to only return queues the user is a part of.
@@ -219,7 +219,7 @@ Outlined below is a list of REST API endpoints which support the following actio
 }
 ```
 
-### Song
+## Song
 
 #### POST /api/queue/:id/songs
 * Allows the member of a queue or an admin to add a song to the list.

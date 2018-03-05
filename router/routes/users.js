@@ -88,12 +88,11 @@ router.get('/:id', function(req, res, next) {
 router.put('/:id', function(req, res, next) {
   let body = req.body
   let vld = req.validator
-  console.log(req.body)
 
   if (vld.allowOnlyFields(body, AllowedFields.putUser, null)) {
     req.db.user.update(body, { where: {id: req.params.id }})
     .then(user => {
-      res.json({ status: "success", data: user })
+      res.json({ status: "success", data: [] })
     })
   }
 });
@@ -107,16 +106,10 @@ router.delete('/:id', function(req, res, next) {
   if (vld.checkAdmin()) {
     req.db.user.destroy({where: {id: req.params.id}})
     .then(user => {
-        res.json({
-            status: "success"
-        }).status(200).end()
+        res.json({ status: "success" }).status(200).end()
     })
     .catch(error => {
-        res.json({
-          status: "error",
-          error: error,
-          data: []
-        })
+        res.json({ status: "error", error: error })
     });
   }
 });

@@ -7,7 +7,7 @@ var MaxFields = require('../Validator.js').MaxFields;
 
 var router = express.Router();
 
-router.baseURL = '/api/queues'
+router.baseURL = '/api/queue'
 
 /* GET /api/users/
  * Get list of users.
@@ -40,11 +40,8 @@ router.get('/', function(req, res, next) {
   });
 });
 
-/* POST /api/users/
- * Allows a user to register.
- * Body: username, password, perm
- * Requires: username, password, perm.
- * Perm = 0 for Guest, Perm = 1 for Spotify User
+/* POST /api/queue/
+ * Allows user to create queue
  */
 router.post('/', function(req, res, next) {
   let body = req.body
@@ -66,7 +63,7 @@ router.post('/', function(req, res, next) {
         owner: req.session.id,
         private: body.private,
         password: body.password ? body.password : null,
-        cur_members: 0,
+        cur_members: 1,
         max_members: MaxFields.QUEUE_MEMBERS,
         cur_songs: 0,
         max_songs: MaxFields.QUEUE_SONGS
@@ -82,7 +79,10 @@ router.post('/', function(req, res, next) {
   }
 });
 
-
+/*
+ * GET /api/queue/:id
+ * Allows member of queue to get queue info and songs
+*/
 router.get('/:id', function(req, res, next) {
   var vld = req.validator;
   var queueId = req.params.id
@@ -115,7 +115,7 @@ router.get('/:id', function(req, res, next) {
           })
       })
     } else {
-      res.status(404).json({
+      res.status(401).json({
         status: "error",
         error: "user is not member of queue",
         data: []})
@@ -125,7 +125,7 @@ router.get('/:id', function(req, res, next) {
 
 
 /* DELETE /api/queues/:id
- * Allows an Admin to delete a user
+ * Allows an Admin or owner to delete a queue
  */
 router.delete('/:id', function(req, res, next) {
   var vld = req.validator;
@@ -139,6 +139,93 @@ router.delete('/:id', function(req, res, next) {
         res.json({ status: "error", error: error, data: [] })
     });
   }
+});
+
+/*
+ * POST /api/queue/:id/songs
+ * Allows user to add song to a queue
+ */
+ router.post('/:id/songs', function(req, res, next) {
+   var vld = req.validator;
+   var queueId = req.params.id
+   var userId = req.session.id
+
+   req.db.sequelize.query(`SELECT COUNT(*) as allowed FROM UserQueue ` +
+                           `WHERE QueueId=${queueId} AND UserId=${userId}`)
+   .spread((result, metadata) => {
+     if (result[0].allowed || vld.checkAdmin()) {
+       req.db.queue.findOne({where: {id: queueId}})
+       .then(queue => {
+         queue.createSong({ spotify_uri: "testURI", userId: userId})
+         .then(song => {
+           res.json({status: "success", data: song})
+         })
+       })
+     } else {
+       res.status(401).json({
+         status: "error",
+         error: "user not member of queue"
+       })
+     }
+   })
+ });
+
+/*
+ * GET /api/queue/:id/songs
+ * Allows user to get list of songs
+ */
+router.get('/:id/songs', function(req, res, next) {
+  var vld = req.validator;
+  var queueId = req.params.id
+  var userId = req.session.id
+
+  req.db.sequelize.query(`SELECT COUNT(*) as allowed FROM UserQueue ` +
+                          `WHERE QueueId=${queueId} AND UserId=${userId}`)
+  .spread((result, metadata) => {
+    if (result[0].allowed || vld.checkAdmin()) {
+      req.db.song.findAll({where: {queueId: req.params.id}})
+      .then(song => {
+          res.json({ status: "success", data: song})
+      })
+      .catch(error => {
+          res.json({ status: "error", error: error })
+      });
+    } else {
+      res.status(401).json({
+        status: "error",
+        error: "user not member of queue"
+      })
+    }
+  })
+});
+
+
+/* DELETE /api/queue/:id
+ * Allows an Admin to delete a user
+ */
+router.delete('/:id/songs/:songId', function(req, res, next) {
+  var vld = req.validator;
+  var queueId = req.params.id
+  var userId = req.session.id
+
+  req.db.sequelize.query(`SELECT COUNT(*) as allowed FROM UserQueue ` +
+                          `WHERE QueueId=${queueId} AND UserId=${userId}`)
+  .spread((result, metadata) => {
+    if (result[0].allowed || vld.checkAdmin()) {
+      req.db.song.destroy({where: {id: req.params.id}})
+      .then(user => {
+          res.json({ status: "success" }).status(200).end()
+      })
+      .catch(error => {
+          res.json({ status: "error", error: error })
+      });
+    } else {
+      res.status(401).json({
+        status: "error",
+        error: "user not member of queue"
+      })
+    }
+  })
 });
 
 module.exports = router;

@@ -42,7 +42,7 @@ app.use(function(req, res, next) {
 app.use('/api/auth', require('./router/routes/auth.js'));
 app.use('/api/user', require('./router/routes/users.js'));
 app.use('/api/queue', require('./router/routes/queues.js'));
-app.use('/api/queue', require('./router/routes/songs.js'));
+app.use('/api/song', require('./router/routes/songs.js'));
 app.use('/api/queue', require('./router/routes/members.js'));
 
 app.delete('/api/DB', function(req, res) {

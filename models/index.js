@@ -33,6 +33,7 @@ db.Sequelize = Sequelize;
 db.user = require('../models/user.js')(sequelize, Sequelize);
 db.song = require('../models/song.js')(sequelize, Sequelize);
 db.queue = require('../models/queue.js')(sequelize, Sequelize);
+db.vote = require('../models/uservote.js')(sequelize, Sequelize);
 
 
 Object.keys(db).forEach(modelName => {

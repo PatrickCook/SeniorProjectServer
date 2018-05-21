@@ -13,9 +13,15 @@ router.baseURL = '/api/users'
  * Requires admin permissions to receive all users or returns just the AU
  */
 router.get('/', function(req, res, next) {
-  req.db.user.findAll({
-    attributes: ['id', 'username', 'first_name', 'last_name']
-  })
+  var options = {
+     attributes: ['id', 'username', 'first_name', 'last_name']
+  }
+
+  if (req.query.search) {
+     options.where = { username: { $like: '%' + req.query.search + '%' } }
+  }
+
+  req.db.user.findAll(options)
   .then(users => {
       res.json({
           status: "success",

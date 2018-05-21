@@ -9,7 +9,7 @@ var router = express.Router();
 
 router.baseURL = '/api/queue'
 
-/* GET /api/users/
+/* GET /api/queue/
  * Get list of users.
  * Requires admin permissions to receive all users or returns just the AU
  */
@@ -20,20 +20,23 @@ router.get('/', function(req, res, next) {
     filter.owner = req.query.owner
 
   if (req.query.name)
-    filter.name = req.query.name
+    filter.name = { $like: '%' + req.query.name + '%' }
 
   req.db.queue.findAll({
     where: filter,
-    attributes: ['id', 'owner', 'name', 'max_members', 'max_songs',
-                 'private', 'createdAt', 'updatedAt'],
     include: [{
-      model: req.db.user,
-      attributes: ["id", "username", "first_name", "last_name"],
-      through: { attributes: [] }
+         model: req.db.user,
+         attributes: ["id", "username", "first_name", "last_name"],
     }]
   })
-  .then(queues => {
-      res.json({ status: "success", data: queues }).status(200).end()
+  .then(result => {
+      result.forEach((queue) => {
+         queue.dataValues.ownerUsername = queue.dataValues.Users[0].username
+      })
+      res.json({
+         status: "success",
+         data: result
+      }).status(200).end()
   })
   .catch(error => {
       res.json({status: "error", error: error, data: []})
@@ -46,7 +49,7 @@ router.get('/', function(req, res, next) {
 router.post('/', function(req, res, next) {
   let body = req.body
   let vld = req.validator
-
+  console.log(body)
   if (vld.hasFields(body, RequiredFields.postQueue, null) &&
       vld.allowOnlyFields(body, AllowedFields.postQueue, null) &&
       vld.check(!body.private|| (body.private && body.password),
@@ -63,18 +66,21 @@ router.post('/', function(req, res, next) {
         owner: req.session.id,
         private: body.private,
         password: body.password ? body.password : null,
-        cur_members: 1,
+        cur_members: body.members.length + 1,
         max_members: MaxFields.QUEUE_MEMBERS,
         cur_songs: 0,
         max_songs: MaxFields.QUEUE_SONGS
       }
     })
     .then(queue => {
-      req.db.user.findOne({where: {id: req.session.id}})
-      .then(user => {
-        queue[0].addUser(user)
-        .then(result => res.json({status: "success", data: queue[0]}))
-      })
+      let members = body.members
+      members.push(req.session.id)
+      members.forEach(function(member) {
+         req.db.user.findOne({where: {id: member}}).then(user => {
+           queue[0].addUser(user)
+         })
+      });
+      res.json({status: "success", data: queue[0]})
     })
   }
 });
@@ -92,8 +98,7 @@ router.get('/:id', function(req, res, next) {
                           `WHERE QueueId=${queueId} AND UserId=${userId}`)
   .spread((result, metadata) => {
     if (result[0].allowed || vld.checkAdmin()) {
-      req.db.queue.findAll({
-        where: {id: req.params.id},
+      req.db.queue.findById(req.params.id, {
         attributes: ['id', 'owner', 'name', 'max_members', 'max_songs',
                      'private', 'createdAt', 'updatedAt'],
         include: [{
@@ -105,7 +110,7 @@ router.get('/:id', function(req, res, next) {
         }]
       })
       .then(queue => {
-        if (queue.length)
+        if (queue)
           res.status(200).json({ status: "success", data: queue })
         else
           res.status(404).json({

@@ -29,14 +29,14 @@ Validator.AllowedFields = {
   postAuth: ['username', 'password_hash'],
   putUser: ["username", "first_name", "last_name", "password_hash"],
   postUser: ["username", "first_name", "last_name", "password_hash", "role"],
-  postQueue: ["name", "private", "password"],
+  postQueue: ["name", "private", "password", "members"],
   postJoin: ["password"]
 }
 
 Validator.RequiredFields = {
   postAuth: ['username', 'password_hash'],
   postUser: ["username", "first_name", "last_name", "password_hash"],
-  postQueue: ["name", "private"]
+  postQueue: ["name", "private", "members"]
 }
 
 Validator.MaxFields = {

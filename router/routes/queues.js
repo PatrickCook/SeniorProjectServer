@@ -152,17 +152,27 @@ router.delete('/:id', function(req, res, next) {
  */
  router.post('/:id/songs', function(req, res, next) {
    var vld = req.validator;
+   var body = req.body
    var queueId = req.params.id
    var userId = req.session.id
 
    req.db.sequelize.query(`SELECT COUNT(*) as allowed FROM UserQueue ` +
                            `WHERE QueueId=${queueId} AND UserId=${userId}`)
    .spread((result, metadata) => {
-     if (result[0].allowed || vld.checkAdmin()) {
+     if ((result[0].allowed || vld.checkAdmin()) &&
+          vld.hasFields(body, RequiredFields.postSong, null)) {
+
        req.db.queue.findOne({where: {id: queueId}})
        .then(queue => {
-         queue.createSong({ spotify_uri: "testURI", userId: userId})
-         .then(song => {
+         queue.createSong({
+            title: body.title,
+            artist: body.artist,
+            album_uri: body.album_uri,
+            preview_uri: body.preview_uri,
+            spotify_uri: body.spotify_uri,
+            userId: userId,
+            votes: 0
+         }).then(song => {
            res.json({status: "success", data: song})
          })
        })

@@ -7,10 +7,15 @@ module.exports = (sequelize, DataTypes) => {
       primaryKey: true,
       type: DataTypes.INTEGER
     },
-    votes: DataTypes.INTEGER,
-    spotify_uri: {
-      type: DataTypes.STRING
+    votes: {
+      allowNull: false,
+      type: DataTypes.INTEGER
     },
+    title: DataTypes.STRING,
+    artist: DataTypes.STRING,
+    album_uri: DataTypes.STRING,
+    preview_uri: DataTypes.STRING,
+    spotify_uri: DataTypes.STRING,
     createdAt: {
       allowNull: false,
       type: DataTypes.DATE

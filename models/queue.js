@@ -28,7 +28,7 @@ module.exports = (sequelize, DataTypes) => {
   }, {
     freezeTableName: true
   });
-  
+
   Queue.associate = function(models) {
     Queue.hasMany(models.song, {
       foreignKey: 'queueId',
@@ -40,5 +40,6 @@ module.exports = (sequelize, DataTypes) => {
       onDelete: 'CASCADE'
     });
   };
+
   return Queue;
 };

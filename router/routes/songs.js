@@ -16,13 +16,13 @@ router.put('/:id/vote', function(req, res, next) {
   // Get song and get it's queue
   req.db.song.findById(songId).then(song => {
       return req.db.sequelize.query(
-        `SELECT COUNT(*) as allowed FROM UserQueue ` +
+        `SELECT COUNT(*) as 'allowed' FROM UserQueue ` +
         `WHERE QueueId=${song.queueId} AND UserId=${userId}`
       )
   }).spread((result, metadata) => { // Ensure user is contained in queue
     if (result[0].allowed) {
       return req.db.sequelize.query(
-        `SELECT COUNT(*) as exists FROM UserVote ` +
+        `SELECT COUNT(*) as 'exists' FROM UserVotes ` +
         `WHERE songId=${songId} AND userId=${userId}`
       )
     } else {
@@ -37,10 +37,15 @@ router.put('/:id/vote', function(req, res, next) {
         songId: songId,
         userId: userId
       }).then(vote => {
-        req.db.song.findById(songId).then(song => {
-          return user.increment('votes', {by: 1})
-        })
-      })
+        req.db.song.findById(songId)
+        .then(song => {
+          return song.increment('votes', {by: 1})
+       }).then(result => {
+          res.status(200).json({
+            status: "success", error: ""
+          })
+       })
+     })
     }
   })
 })

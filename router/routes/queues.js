@@ -168,7 +168,7 @@ router.delete('/:id', function(req, res, next) {
             title: body.title,
             artist: body.artist,
             album_uri: body.album_uri,
-            preview_uri: body.preview_uri,
+            preview_uri: body.preview_uri ? body.preview_uri : null,
             spotify_uri: body.spotify_uri,
             userId: userId,
             votes: 0

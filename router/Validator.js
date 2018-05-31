@@ -37,7 +37,7 @@ Validator.RequiredFields = {
   postAuth: ['username', 'password_hash'],
   postUser: ["username", "first_name", "last_name", "password_hash"],
   postQueue: ["name", "private", "members"],
-  postSong: ["title", "artist", "album_uri", "preview_uri", "spotify_uri"]
+  postSong: ["title", "artist", "album_uri", "spotify_uri"]
 }
 
 Validator.MaxFields = {

@@ -34,6 +34,7 @@ module.exports = (sequelize, DataTypes) => {
      });
 
      Song.belongsTo(models.user, {
+        as: 'queuedBy',
         foreignKey: 'owner'
      })
   };

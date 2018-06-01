@@ -110,7 +110,8 @@ router.get('/:id', function(req, res, next) {
                   as: 'votes'
                }, {
                   model:req.db.user,
-                  attributes: ["username"]
+                  attributes: ["username"],
+                  as: 'queuedBy'
                }],
             }]
          })

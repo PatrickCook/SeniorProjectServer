@@ -7,10 +7,6 @@ module.exports = (sequelize, DataTypes) => {
       primaryKey: true,
       type: DataTypes.INTEGER
     },
-    votes: {
-      allowNull: false,
-      type: DataTypes.INTEGER
-    },
     title: DataTypes.STRING,
     artist: DataTypes.STRING,
     album_uri: DataTypes.STRING,
@@ -28,7 +24,18 @@ module.exports = (sequelize, DataTypes) => {
     freezeTableName: true
   });
   Song.associate = function(models) {
+     Song.hasMany(models.vote, {
+        as: 'votes',
+        onDelete: 'CASCADE',
+        foreignKey: {
+           allowNull: false,
+           primaryKey: true
+        }
+     });
 
+     Song.belongsTo(models.user, {
+        foreignKey: 'owner'
+     })
   };
   return Song;
 };

@@ -34,12 +34,6 @@ module.exports = (sequelize, DataTypes) => {
     User.hasMany(models.queue, {
       foreignKey: 'owner',
       onDelete: 'CASCADE'
-
-    });
-
-    User.hasMany(models.song, {
-      foreignKey: 'userId',
-      onDelete: 'CASCADE'
     });
 
     User.belongsToMany(models.queue, {

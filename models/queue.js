@@ -39,6 +39,10 @@ module.exports = (sequelize, DataTypes) => {
       through: 'UserQueue',
       onDelete: 'CASCADE'
     });
+
+    Queue.belongsTo(models.user, {
+      foreignKey: 'owner'
+    });
   };
 
   return Queue;

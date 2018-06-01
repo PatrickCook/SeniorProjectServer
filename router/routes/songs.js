@@ -9,45 +9,47 @@ var router = express.Router();
 router.baseURL = '/api/song'
 
 router.put('/:id/vote', function(req, res, next) {
-  var vld = req.validator
-  var songId = req.params.id
-  var userId = req.session.id
+   var vld = req.validator
+   var songId = req.params.id
+   var userId = req.session.id
 
-  // Get song and get it's queue
-  req.db.song.findById(songId).then(song => {
+   // Get song and get it's queue
+   req.db.song.findById(songId).then(song => {
+      if (!song) {
+         throw "couldnt find song";
+      }
       return req.db.sequelize.query(
-        `SELECT COUNT(*) as 'allowed' FROM UserQueue ` +
-        `WHERE QueueId=${song.queueId} AND UserId=${userId}`
+         `SELECT COUNT(*) as 'allowed' FROM UserQueue ` +
+         `WHERE QueueId=${song.queueId} AND UserId=${userId}`
       )
-  }).spread((result, metadata) => { // Ensure user is contained in queue
-    if (result[0].allowed) {
-      return req.db.sequelize.query(
-        `SELECT COUNT(*) as 'exists' FROM UserVotes ` +
-        `WHERE songId=${songId} AND userId=${userId}`
-      )
-    } else {
-      res.status(401).json({
-        status: "error", error: "User must be member of queue to upvote"
+   }).spread((result, metadata) => { // Ensure user is contained in queue
+      if (result[0].allowed) {
+         req.db.song.findById(songId)
+         .then(song => {
+            return song.createVote({
+               SongId: songId,
+               UserId: userId,
+            })
+         }).then(result => {
+            res.status(200).json({
+               status: "success", error: ""
+            })
+         }).catch((error) => {
+            res.status(200).json({
+               status: "success", error: error
+            })
+         })
+      } else {
+         res.status(401).json({
+            status: "error", error: "User must be member of queue to upvote"
+         })
+         return;
+      }
+   }).catch(error => {
+      res.status(404).json({
+         status: "success", error: error
       })
-      return;
-    }
-  }).spread((result, metadata) => { // Upvote and increment songs votes
-    if (!result[0].exists || vld.checkAdmin()) {
-      req.db.vote.create({
-        songId: songId,
-        userId: userId
-      }).then(vote => {
-        req.db.song.findById(songId)
-        .then(song => {
-          return song.increment('votes', {by: 1})
-       }).then(result => {
-          res.status(200).json({
-            status: "success", error: ""
-          })
-       })
-     })
-    }
-  })
+   })
 })
 
 module.exports = router;

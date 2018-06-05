@@ -44,6 +44,7 @@ router.get('/', function(req, res, next) {
   });
 });
 
+
 /* POST /api/users/
  * Allows a user to register.
  * Body: username, password, perm

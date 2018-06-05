@@ -17,10 +17,10 @@ router.get('/', function(req, res, next) {
    let filter = {}
 
    if (req.query.owner)
-   filter.owner = req.query.owner
+      filter.owner = req.query.owner
 
    if (req.query.name)
-   filter.name = { $like: '%' + req.query.name + '%' }
+      filter.name = { $like: '%' + req.query.name + '%' }
 
    req.db.queue.findAll({
       where: filter,
@@ -37,6 +37,27 @@ router.get('/', function(req, res, next) {
          status: "success",
          data: result
       }).status(200).end()
+   })
+   .catch(error => {
+      res.json({status: "error", error: error, data: []})
+   });
+});
+
+router.get('/my', function(req, res, next) {
+   let currentUser;
+   let filter = {}
+
+   if (req.query.owner)
+      filter.owner = req.query.owner
+
+   req.db.user.findAll({
+      where: { id: req.session.id },
+      include: [{
+         model: req.db.queue,
+      }]
+   })
+   .then(result => {
+      res.json({ status: "success", data: result }).status(200).end()
    })
    .catch(error => {
       res.json({status: "error", error: error, data: []})
@@ -222,7 +243,7 @@ router.get('/:id', function(req, res, next) {
 
 
    /* DELETE /api/queue/:id
-   * Allows an Admin to delete a user
+   * Allows an Admin to delete a song
    */
    router.delete('/:id/songs/:songId', function(req, res, next) {
       var vld = req.validator;

@@ -6,7 +6,7 @@ var RequiredFields = require('../Validator.js').RequiredFields;
 
 var router = express.Router();
 
-router.baseURL = '/api/users'
+router.baseURL = '/api/user'
 
 /* GET /api/users/
  * Get list of users.
@@ -18,8 +18,15 @@ router.get('/', function(req, res, next) {
   }
 
   if (req.query.search) {
-     options.where = { username: { $like: '%' + req.query.search + '%' } }
-  }
+     options.where = {
+        username: { $like: '%' + req.query.search + '%' },
+        id: { $ne: req.session.id }
+     }
+  } else {
+     options.where = {
+       id: { $ne: req.session.id }
+     }
+ }
 
   req.db.user.findAll(options)
   .then(users => {

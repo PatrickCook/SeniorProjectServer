@@ -11,6 +11,16 @@ var Session = require('./router/Session.js');
 
 var app = express();
 
+var Pusher = require('pusher');
+
+var pusher = new Pusher({
+  appId: '478978',
+  key: 'f24ae820c20aa1b1acda',
+  secret: '3282b1f895978bb203e8',
+  cluster: 'us2',
+  encrypted: true
+});
+
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(logger('dev'));
 
@@ -32,6 +42,7 @@ app.use(function(req, res, next) {
   if (req.session || (req.method === 'POST' &&
    (req.path === '/api/user' || req.path === '/api/auth'))) {
     req.validator = new Validator(req, res);
+    req.pusher = pusher;
     req.db = db;
     next();
   } else {

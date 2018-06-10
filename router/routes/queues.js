@@ -72,9 +72,9 @@ router.post('/', function(req, res, next) {
    let vld = req.validator
    console.log(body)
    if (vld.hasFields(body, RequiredFields.postQueue, null) &&
-   vld.allowOnlyFields(body, AllowedFields.postQueue, null) &&
-   vld.check(!body.private|| (body.private && body.password),
-   Tags.missingField, ["password"], null)) {
+    vld.allowOnlyFields(body, AllowedFields.postQueue, null) &&
+    vld.check(!body.private|| (body.private && body.password),
+    Tags.missingField, ["password"], null)) {
 
       let password = body.password ? body.password : null;
       req.db.queue.findOrCreate({
@@ -90,7 +90,9 @@ router.post('/', function(req, res, next) {
             cur_members: body.members.length + 1,
             max_members: MaxFields.QUEUE_MEMBERS,
             cur_songs: 0,
-            max_songs: MaxFields.QUEUE_SONGS
+            max_songs: MaxFields.QUEUE_SONGS,
+            isPlaying: false,
+            playingUserId: -1
          }
       })
       .then(queue => {
@@ -155,119 +157,218 @@ router.get('/:id', function(req, res, next) {
       });
    });
 
+router.get('/:id', function(req, res, next) {
+   var vld = req.validator;
+   var queueId = req.params.id
+   var userId = req.session.id
 
-   /* DELETE /api/queues/:id
-   * Allows an Admin or owner to delete a queue
-   */
-   router.delete('/:id', function(req, res, next) {
-      var vld = req.validator;
-
-      if (vld.checkPrsOK(req.session.id)) {
-         req.db.queue.destroy({where: {id: req.params.id}})
-         .then(user => {
-            res.json({ status: "success" }).status(200).end()
+   req.db.sequelize.query(`SELECT COUNT(*) as allowed FROM UserQueue ` +
+   `WHERE QueueId=${queueId} AND UserId=${userId}`)
+   .spread((result, metadata) => {
+      if (result[0].allowed || vld.checkAdmin()) {
+         req.db.queue.findById(req.params.id, {
+            include: [{
+               model: req.db.user,
+               attributes: ["id", "username", "first_name", "last_name"],
+               through: { attributes: [] }
+            }, {
+               model: req.db.song,
+               include: [{
+                  model:req.db.vote,
+                  as: 'votes'
+               }, {
+                  model:req.db.user,
+                  attributes: ["username"],
+                  as: 'queuedBy'
+               }],
+            }]
          })
-         .catch(error => {
-            res.json({ status: "error", error: error, data: [] })
-         });
+         .then(queue => {
+            if (queue) {
+               res.status(200).json({ status: "success", data: queue })
+            } else
+            res.status(404).json({
+               status: "error",
+               error: "Queue does not exist",
+               data: []
+            })
+         })
+      } else {
+         res.status(401).json({
+            status: "error",
+            error: "user is not member of queue",
+            data: []})
       }
    });
+});
 
-   /*
-   * POST /api/queue/:id/songs
-   * Allows user to add song to a queue
-   */
-   router.post('/:id/songs', function(req, res, next) {
-      var vld = req.validator;
-      var body = req.body
-      var queueId = req.params.id
-      var userId = req.session.id
+router.post('/:id/playing', function(req, res, next) {
+   var vld = req.validator;
+   var queueId = req.params.id;
+   var userId = req.session.id;
 
-      req.db.sequelize.query(`SELECT COUNT(*) as allowed FROM UserQueue ` +
-      `WHERE QueueId=${queueId} AND UserId=${userId}`)
+   if (vld.hasFields(req.body, RequiredFields.isPlayingQueue, null)) {
+
+      req.db.sequelize.query(`SELECT COUNT(*) as allowed FROM UserQueue WHERE QueueId=${queueId} AND UserId=${userId}`)
       .spread((result, metadata) => {
-         if ((result[0].allowed || vld.checkAdmin()) &&
-         vld.hasFields(body, RequiredFields.postSong, null)) {
-
-            req.db.queue.findOne({where: {id: queueId}})
-            .then(queue => {
-               queue.createSong({
-                  title: body.title,
-                  artist: body.artist,
-                  album_uri: body.album_uri,
-                  preview_uri: body.preview_uri ? body.preview_uri : null,
-                  spotify_uri: body.spotify_uri,
-                  owner: userId,
-                  votes: 0
-               }).then(song => {
-                  res.json({status: "success", data: song})
-               })
+         if (result[0].allowed || vld.checkAdmin()) {
+            req.db.queue.update(
+               {
+                  isPlaying: req.body.isPlaying,
+                  playingUserId: req.body.isPlaying ? userId : -1
+               },
+               {where: {id: queueId}}
+            ).then(queue => {
+               if (queue) {
+                  req.pusher.trigger('my-channel', 'queue-playback-changed', {
+                     status: "success",
+                     message: "Queue playback changed",
+                     queueId: queueId,
+                     isPlaying: req.body.isPlaying,
+                     playingUserId: req.body.isPlaying ? userId : -1
+                  });
+                  res.json({ status: "success" }).status(200).end()
+               }
             })
          } else {
             res.status(401).json({
                status: "error",
-               error: "user not member of queue"
-            })
+               error: "user is not member of queue",
+               data: []})
          }
+     });
+   }
+});
+
+
+
+/* DELETE /api/queues/:id
+* Allows an Admin or owner to delete a queue
+*/
+router.delete('/:id', function(req, res, next) {
+   var vld = req.validator;
+
+   if (vld.checkPrsOK(req.session.id)) {
+      req.db.queue.destroy({where: {id: req.params.id}})
+      .then(user => {
+         res.json({ status: "success" }).status(200).end()
       })
-   });
+      .catch(error => {
+         res.json({ status: "error", error: error, data: [] })
+      });
+   }
+});
 
-   /*
-   * GET /api/queue/:id/songs
-   * Allows user to get list of songs
-   */
-   router.get('/:id/songs', function(req, res, next) {
-      var vld = req.validator;
-      var queueId = req.params.id
-      var userId = req.session.id
+/*
+* POST /api/queue/:id/songs
+* Allows user to add song to a queue
+*/
+router.post('/:id/songs', function(req, res, next) {
+   var vld = req.validator;
+   var body = req.body
+   var queueId = req.params.id
+   var userId = req.session.id
 
-      req.db.sequelize.query(`SELECT COUNT(*) as allowed FROM UserQueue ` +
-      `WHERE QueueId=${queueId} AND UserId=${userId}`)
-      .spread((result, metadata) => {
-         if (result[0].allowed || vld.checkAdmin()) {
-            req.db.song.findAll({where: {queueId: req.params.id}})
-            .then(song => {
-               res.json({ status: "success", data: song})
+   req.db.sequelize.query(`SELECT COUNT(*) as allowed FROM UserQueue ` +
+   `WHERE QueueId=${queueId} AND UserId=${userId}`)
+   .spread((result, metadata) => {
+      if ((result[0].allowed || vld.checkAdmin()) &&
+       vld.hasFields(body, RequiredFields.postSong, null)) {
+
+         req.db.queue.findOne({where: {id: queueId}})
+         .then(queue => {
+            queue.createSong({
+               title: body.title,
+               artist: body.artist,
+               album_uri: body.album_uri,
+               preview_uri: body.preview_uri ? body.preview_uri : null,
+               spotify_uri: body.spotify_uri,
+               owner: userId,
+               votes: 0
+            }).then(song => {
+               req.pusher.trigger('my-channel', 'song-added-to-queue', {
+                  status: "success",
+                  message: "Song added to queue",
+                  queueId: queueId,
+                  song: song
+               });
+               res.json({status: "success", data: song})
             })
-            .catch(error => {
-               res.json({ status: "error", error: error })
-            });
-         } else {
-            res.status(401).json({
-               status: "error",
-               error: "user not member of queue"
-            })
-         }
-      })
-   });
+         })
+      } else {
+         res.status(401).json({
+            status: "error",
+            error: "user not member of queue"
+         })
+      }
+   })
+});
+
+/*
+* GET /api/queue/:id/songs
+* Allows user to get list of songs
+*/
+router.get('/:id/songs', function(req, res, next) {
+   var vld = req.validator;
+   var queueId = req.params.id
+   var userId = req.session.id
+
+   req.db.sequelize.query(`SELECT COUNT(*) as allowed FROM UserQueue ` +
+   `WHERE QueueId=${queueId} AND UserId=${userId}`)
+   .spread((result, metadata) => {
+      if (result[0].allowed || vld.checkAdmin()) {
+         req.db.song.findAll({where: {queueId: req.params.id}})
+         .then(song => {
+            res.json({ status: "success", data: song})
+         })
+         .catch(error => {
+            res.json({ status: "error", error: error })
+         });
+      } else {
+         res.status(401).json({
+            status: "error",
+            error: "user not member of queue"
+         })
+      }
+   })
+});
 
 
-   /* DELETE /api/queue/:id
-   * Allows an Admin to delete a song
-   */
-   router.delete('/:id/songs/:songId', function(req, res, next) {
-      var vld = req.validator;
-      var queueId = req.params.id
-      var userId = req.session.id
+/* DELETE /api/queue/:id
+* Allows an Admin to delete a song
+*/
+router.delete('/:id/songs/:songId', function(req, res, next) {
+   var vld = req.validator;
+   var queueId = req.params.id
+   var userId = req.session.id
+   var songId = req.params.songId
 
-      req.db.sequelize.query(`SELECT COUNT(*) as allowed FROM UserQueue ` +
-      `WHERE QueueId=${queueId} AND UserId=${userId}`)
-      .spread((result, metadata) => {
-         if (result[0].allowed || vld.checkAdmin()) {
-            req.db.song.destroy({where: {id: req.params.id}})
-            .then(user => {
+   req.db.sequelize.query(`SELECT COUNT(*) as allowed FROM UserQueue ` +
+   `WHERE QueueId=${queueId} AND UserId=${userId}`)
+   .spread((result, metadata) => {
+      if (result[0].allowed || vld.checkAdmin()) {
+         req.db.song.destroy({where: {id: songId}})
+         .then(user => {
+            req.db.queue.findOne({where: {id: queueId}}).then(queue => {
+               req.pusher.trigger('my-channel', 'song-deleted-from-queue', {
+                  status: "success",
+                  message: "Song deleted from queue",
+                  queueId: queueId,
+                  songId: songId
+               });
                res.json({ status: "success" }).status(200).end()
             })
-            .catch(error => {
-               res.json({ status: "error", error: error })
-            });
-         } else {
-            res.status(401).json({
-               status: "error",
-               error: "user not member of queue"
-            })
-         }
-      })
-   });
+         })
+         .catch(error => {
+            res.json({ status: "error", error: error })
+         });
+      } else {
+         res.status(401).json({
+            status: "error",
+            error: "user not member of queue"
+         })
+      }
+   })
+});
 
-   module.exports = router;
+module.exports = router;

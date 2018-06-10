@@ -26,6 +26,10 @@ router.put('/:id/vote', function(req, res, next) {
       if (result[0].allowed) {
          req.db.song.findById(songId)
          .then(song => {
+            req.pusher.trigger('my-channel', 'song-upvoted', {
+              "message": "Refresh queue after user voted",
+              "queueId": song.queueId
+            });
             return song.createVote({
                SongId: songId,
                UserId: userId,

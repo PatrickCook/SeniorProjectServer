@@ -22,12 +22,14 @@ router.post('/', function(req, res, next) {
 
       db.user.findOne({ where: {username: body.username }})
       .then(result => {
-        console.log(result.password_hash, body.password_hash)
         if (vld.check(result &&
          result.password_hash === body.password_hash, Tags.badLogin, null, cb)) {
           cookie = sessionUtil.makeSession(result, res);
 
-          res.location(router.baseURL + '/' + cookie).status(200).end();
+          res.location(router.baseURL + '/' + cookie).status(200).json({
+            status: "success",
+            data: result
+          })
         }
       })
       .catch(error => {

@@ -11,6 +11,8 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       required: true
     },
+    isPlaying: DataTypes.BOOLEAN,
+    playingUserId: DataTypes.INTEGER,
     cur_members: DataTypes.INTEGER,
     max_members: DataTypes.INTEGER,
     cur_songs: DataTypes.INTEGER,

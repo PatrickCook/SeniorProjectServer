@@ -37,6 +37,7 @@ Validator.RequiredFields = {
   postAuth: ['username', 'password_hash'],
   postUser: ["username", "first_name", "last_name", "password_hash"],
   postQueue: ["name", "private", "members"],
+  isPlayingQueue: ["isPlaying"],
   postSong: ["title", "artist", "album_uri", "spotify_uri"]
 }
 
@@ -127,6 +128,5 @@ Validator.prototype.allowOnlyFields = function(obj, fieldList, cb) {
 
    return this.check(true, null, null, cb);
 };
-
 
 module.exports = Validator;

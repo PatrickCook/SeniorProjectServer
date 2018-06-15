@@ -26,7 +26,7 @@ router.get('/', function(req, res, next) {
       where: filter,
       include: [{
          model: req.db.user,
-         attributes: ["id", "username", "first_name", "last_name"],
+         attributes: ["id", "username", "role"],
       }]
    })
    .then(result => {
@@ -124,7 +124,7 @@ router.get('/:id', function(req, res, next) {
          req.db.queue.findById(req.params.id, {
             include: [{
                model: req.db.user,
-               attributes: ["id", "username", "first_name", "last_name"],
+               attributes: ["id", "username", "role"],
                through: { attributes: [] }
             }, {
                model: req.db.song,
@@ -169,7 +169,7 @@ router.get('/:id', function(req, res, next) {
          req.db.queue.findById(req.params.id, {
             include: [{
                model: req.db.user,
-               attributes: ["id", "username", "first_name", "last_name"],
+               attributes: ["id", "username", "role"],
                through: { attributes: [] }
             }, {
                model: req.db.song,
@@ -372,3 +372,22 @@ router.delete('/:id/songs/:songId', function(req, res, next) {
 });
 
 module.exports = router;
+
+/*
+queue.getSongs().then(songs => {
+   queue.setCurrentSong(songs[0]);
+}).then(song => {
+   queue.removeSong(song)
+}).then(song => {
+   req.pusher.trigger('my-channel', 'queue-playback-changed', {
+      status: "success",
+      message: "Queue playback changed",
+      queueId: queueId,
+      isPlaying: req.body.isPlaying,
+      playingUserId: req.body.isPlaying ? userId : -1
+   });
+   res.json({ status: "success" }).status(200).end()
+}).catch(error => {
+   console.log(error)
+})
+*/

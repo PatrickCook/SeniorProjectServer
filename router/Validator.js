@@ -26,24 +26,24 @@ Validator.Tags = {
 };
 
 Validator.AllowedFields = {
-  postAuth: ['username', 'password_hash'],
-  putUser: ["username", "first_name", "last_name", "password_hash"],
-  postUser: ["username", "first_name", "last_name", "password_hash", "role"],
-  postQueue: ["name", "private", "password", "members"],
-  postJoin: ["password"]
+   postAuth: ['username', 'password_hash'],
+   putUser: ["username", "first_name", "last_name", "password_hash"],
+   postUser: ["username", "password_hash", "role"],
+   postQueue: ["name", "private", "password", "members"],
+   postJoin: ["password"]
 }
 
 Validator.RequiredFields = {
-  postAuth: ['username', 'password_hash'],
-  postUser: ["username", "first_name", "last_name", "password_hash"],
-  postQueue: ["name", "private", "members"],
-  isPlayingQueue: ["isPlaying"],
-  postSong: ["title", "artist", "album_uri", "spotify_uri"]
+   postAuth: ['username', 'password_hash'],
+   postUser: ["username", "password_hash"],
+   postQueue: ["name", "private", "members"],
+   isPlayingQueue: ["isPlaying"],
+   postSong: ["title", "artist", "album_uri", "spotify_uri"]
 }
 
 Validator.MaxFields = {
-  QUEUE_SONGS: 20,
-  QUEUE_MEMBERS: 20
+   QUEUE_SONGS: 20,
+   QUEUE_MEMBERS: 20
 }
 
 
@@ -64,18 +64,19 @@ Validator.prototype.check = function(test, tag, params, cb) {
       this.errors.push({tag: tag, params: params});
 
    if (this.errors.length) {
-    if (this.res) {
-     if (this.errors[0].tag === Validator.Tags.noPermission)
-      this.res.status(403).end();
+      if (this.res) {
+         if (this.errors[0].tag === Validator.Tags.noPermission) {
+            this.res.status(403).end();
 
-     else {
-      this.res.status(400).json(this.errors);
-     }
-     this.res = null; // Preclude repeated closings
-    }
-    if (cb) {
-     cb(this);
-    }
+         } else {
+            console.log("here")
+            this.res.status(400).json(this.errors);
+         }
+         this.res = null; // Preclude repeated closings
+      }
+      if (cb) {
+         cb(this);
+      }
    }
 
    return !this.errors.length;
@@ -92,7 +93,7 @@ Validator.prototype.chain = function(test, tag, params) {
 
 Validator.prototype.checkAdmin = function(cb) {
    return this.check(this.session && this.session.isAdmin(),
-    Validator.Tags.noPermission, null, cb);
+   Validator.Tags.noPermission, null, cb);
 };
 
 // Validate that AU is the specified person or is an admin
@@ -102,7 +103,7 @@ Validator.prototype.checkPrsOK = function(prsId, cb) {
    }
 
    return this.check(this.session && (this.session.isAdmin() ||
-    this.session.id === prsId), Validator.Tags.noPermission, null, cb);
+   this.session.id === prsId), Validator.Tags.noPermission, null, cb);
 };
 
 // Check presence of truthy property in |obj| for all fields in fieldList
@@ -111,7 +112,7 @@ Validator.prototype.hasFields = function(obj, fieldList, cb) {
 
    fieldList.forEach(function(name) {
       self.chain(obj.hasOwnProperty(name),
-       Validator.Tags.missingField, [name]);
+      Validator.Tags.missingField, [name]);
    });
 
    return this.check(true, null, null, cb);
@@ -123,7 +124,7 @@ Validator.prototype.allowOnlyFields = function(obj, fieldList, cb) {
 
    Object.keys(obj).forEach(function(property, index) {
       self.chain(fieldList.indexOf(property) > -1,
-       Validator.Tags.forbiddenField, [property]);
+      Validator.Tags.forbiddenField, [property]);
    });
 
    return this.check(true, null, null, cb);

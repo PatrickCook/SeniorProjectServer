@@ -14,7 +14,7 @@ router.baseURL = '/api/user'
  */
 router.get('/', function(req, res, next) {
   var options = {
-     attributes: ['id', 'username', 'first_name', 'last_name']
+     attributes: ['id', 'username', 'role']
   }
 
   if (req.query.search) {
@@ -63,11 +63,9 @@ router.post('/', function(req, res, next) {
       where: {
         username: body.username
       },
-      attributes: ["id", "username", "first_name", "last_name", "role"],
+      attributes: ["id", "username", "role"],
       defaults: {
         username: body.username,
-        first_name: body.first_name,
-        last_name: body.last_name,
         role: body.role,
         password_hash: body.password_hash
       }
@@ -85,7 +83,7 @@ router.post('/', function(req, res, next) {
 router.get('/:id', function(req, res, next) {
   req.db.user.findOne({
     where: { id: req.params.id },
-    attributes: ['username', 'first_name', 'last_name']
+    attributes: ['id', 'username', 'role']
   })
   .then(user => {
     if (user)

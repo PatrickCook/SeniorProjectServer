@@ -7,6 +7,7 @@ To start the REST api clone the repo and `cd` into the directory. The `app.js` i
 ```
 - npm install
 - node app.js
+sequelize db:seed:all
 ```
 
 #### Database Configuration
@@ -62,7 +63,7 @@ Outlined below is a list of REST API endpoints which support the following actio
 
 ### POST /api/user
 * Allows an unauthorized person to create a new user. Only an admin can create a user with role `admin`
-* Required Fields: `username, first_name, last_name, password_hash, role`
+* Required Fields: `username, first_name, last_name, passwordHash, role`
 * New user id is returned in the header of the response
 
 **Example Response:**
@@ -94,7 +95,7 @@ Outlined below is a list of REST API endpoints which support the following actio
 ```
 
 ### PUT /api/user/:id
-* Allows a user to update and of the following fields: `username, first_name, last_name, password_hash`
+* Allows a user to update and of the following fields: `username, first_name, last_name, passwordHash`
 
 **Example Request Body:**
 ```
@@ -102,7 +103,7 @@ Outlined below is a list of REST API endpoints which support the following actio
 	"username": "newUsername",
 	"first_name": "Update",
 	"last_name": "Me",
-	"password_hash": "resetmypassword"
+	"passwordHash": "resetmypassword"
 }
 ```
 **Example Response:**
@@ -139,8 +140,8 @@ Outlined below is a list of REST API endpoints which support the following actio
             "id": 1,
             "owner": 1,
             "name": "Queue 1",
-            "max_members": 20,
-            "max_songs": 20,
+            "maxMembers": 20,
+            "maxSongs": 20,
             "private": false,
             "createdAt": "2018-03-03T21:03:04.000Z",
             "updatedAt": "2018-03-03T21:03:04.000Z",
@@ -177,10 +178,10 @@ Outlined below is a list of REST API endpoints which support the following actio
         "owner": 1,
         "private": false,     // If true 'password' cannot be null
         "password": null,
-        "cur_members": 1,
-        "max_members": 20,
-        "cur_songs": 0,
-        "max_songs": 20,
+        "curMembers": 1,
+        "maxMembers": 20,
+        "curSongs": 0,
+        "maxSongs": 20,
         "updatedAt": "2018-03-05T04:17:00.028Z",
         "createdAt": "2018-03-05T04:17:00.028Z"
     }
@@ -200,8 +201,8 @@ Outlined below is a list of REST API endpoints which support the following actio
             "id": 1,
             "owner": 1,
             "name": "Queue 1",
-            "max_members": 20,
-            "max_songs": 20,
+            "maxMembers": 20,
+            "maxSongs": 20,
             "private": false,
             "createdAt": "2018-03-03T21:03:04.000Z",
             "updatedAt": "2018-03-03T21:03:04.000Z",
@@ -217,7 +218,7 @@ Outlined below is a list of REST API endpoints which support the following actio
                 {
                     "id": 1,
                     "votes": null,
-                    "spotify_uri": "queue-1-song-1",
+                    "spotifyURI": "queue-1-song-1",
                     "createdAt": "2018-03-03T21:03:04.000Z",
                     "updatedAt": "2018-03-03T21:03:04.000Z",
                     "queueId": 1,
@@ -245,7 +246,7 @@ Outlined below is a list of REST API endpoints which support the following actio
 ### POST /api/queue/:id/songs
 * Allows the member of a queue or an admin to add a song to the list.
 * If user is not a member of the queue a response status of `401` is returned
-* Required Request Body Fields: `spotify_uri`
+* Required Request Body Fields: `spotifyURI`
 
 **Example Response:**
 ```
@@ -253,7 +254,7 @@ Outlined below is a list of REST API endpoints which support the following actio
     "status": "success",
     "data": {
         "id": 6,
-        "spotify_uri": "testURI",
+        "spotifyURI": "testURI",
         "userId": 1,
         "queueId": 1,
         "updatedAt": "2018-03-05T04:26:34.858Z",
@@ -274,7 +275,7 @@ Outlined below is a list of REST API endpoints which support the following actio
         {
             "id": 1,
             "votes": 0,
-            "spotify_uri": "testURI",
+            "spotifyURI": "testURI",
             "createdAt": "2018-02-28T00:06:07.000Z",
             "updatedAt": "2018-02-28T00:06:07.000Z",
             "queueId": 2,

@@ -87,10 +87,10 @@ router.post('/', function(req, res, next) {
             owner: req.session.id,
             private: body.private,
             password: body.password ? body.password : null,
-            cur_members: body.members.length + 1,
-            max_members: MaxFields.QUEUE_MEMBERS,
-            cur_songs: 0,
-            max_songs: MaxFields.QUEUE_SONGS,
+            curMembers: body.members.length + 1,
+            maxMembers: MaxFields.QUEUE_MEMBERS,
+            curSongs: 0,
+            maxSongs: MaxFields.QUEUE_SONGS,
             isPlaying: false,
             playingUserId: -1
          }
@@ -280,9 +280,9 @@ router.post('/:id/songs', function(req, res, next) {
             queue.createSong({
                title: body.title,
                artist: body.artist,
-               album_uri: body.album_uri,
-               preview_uri: body.preview_uri ? body.preview_uri : null,
-               spotify_uri: body.spotify_uri,
+               albumURI: body.albumURI,
+               previewURI: body.previewURI ? body.previewURI : null,
+               spotifyURI: body.spotifyURI,
                owner: userId,
                votes: 0
             }).then(song => {

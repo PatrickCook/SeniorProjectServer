@@ -80,14 +80,14 @@ app.delete('/api/DB', function(req, res) {
       first_name: "Patrick",
       last_name: "Cook",
       role: "admin",
-      password_hash: 'password'
+      passwordHash: 'password'
     },
     {
       username: "pcook01",
       first_name: "Patrick",
       last_name: "Cook",
       role: "user",
-      password_hash: 'password'
+      passwordHash: 'password'
     }
   ]).then(users => {
       res.json(users);

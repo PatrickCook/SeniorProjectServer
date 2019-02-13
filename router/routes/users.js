@@ -67,7 +67,7 @@ router.post('/', function(req, res, next) {
       defaults: {
         username: body.username,
         role: body.role,
-        password_hash: body.password_hash
+        passwordHash: body.passwordHash
       }
     })
     .then(user => {

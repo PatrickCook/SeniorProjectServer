@@ -17,7 +17,7 @@ module.exports = {
         allowNull: false
       },
       votes: Sequelize.INTEGER,
-      spotify_uri: {
+      spotifyURI: {
         type: Sequelize.STRING
       },
       createdAat: {

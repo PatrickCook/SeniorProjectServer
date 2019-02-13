@@ -26,19 +26,19 @@ Validator.Tags = {
 };
 
 Validator.AllowedFields = {
-   postAuth: ['username', 'password_hash'],
-   putUser: ["username", "first_name", "last_name", "password_hash"],
-   postUser: ["username", "password_hash", "role"],
+   postAuth: ['username', 'passwordHash'],
+   putUser: ["username", "passwordHash"],
+   postUser: ["username", "passwordHash", "role"],
    postQueue: ["name", "private", "password", "members"],
    postJoin: ["password"]
 }
 
 Validator.RequiredFields = {
-   postAuth: ['username', 'password_hash'],
-   postUser: ["username", "password_hash"],
+   postAuth: ['username', 'passwordHash'],
+   postUser: ["username", "passwordHash"],
    postQueue: ["name", "private", "members"],
    isPlayingQueue: ["isPlaying"],
-   postSong: ["title", "artist", "album_uri", "spotify_uri"]
+   postSong: ["title", "artist", "albumURI", "spotifyURI"]
 }
 
 Validator.MaxFields = {

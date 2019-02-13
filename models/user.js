@@ -16,7 +16,7 @@ module.exports = (sequelize, DataTypes) => {
       values: ['user', 'admin', 'disabled'],
       required: true
     },
-    password_hash: DataTypes.STRING,
+    passwordHash: DataTypes.STRING,
     createdAt: {
       allowNull: false,
       type: DataTypes.DATE

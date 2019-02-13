@@ -12,10 +12,10 @@ module.exports = {
         type: Sequelize.STRING,
         required: true
       },
-      cur_members: Sequelize.INTEGER,
-      max_members: Sequelize.INTEGER,
-      cur_songs: Sequelize.INTEGER,
-      max_songs: Sequelize.INTEGER,
+      curMembers: Sequelize.INTEGER,
+      maxMembers: Sequelize.INTEGER,
+      curSongs: Sequelize.INTEGER,
+      maxSongs: Sequelize.INTEGER,
       private: Sequelize.INTEGER,
       password: Sequelize.STRING,
       createdAt: {

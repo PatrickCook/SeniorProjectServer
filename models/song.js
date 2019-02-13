@@ -9,9 +9,9 @@ module.exports = (sequelize, DataTypes) => {
     },
     title: DataTypes.STRING,
     artist: DataTypes.STRING,
-    album_uri: DataTypes.STRING,
-    preview_uri: DataTypes.STRING,
-    spotify_uri: DataTypes.STRING,
+    albumURI: DataTypes.STRING,
+    previewURI: DataTypes.STRING,
+    spotifyURI: DataTypes.STRING,
     createdAt: {
       allowNull: false,
       type: DataTypes.DATE

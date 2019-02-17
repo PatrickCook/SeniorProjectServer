@@ -73,7 +73,7 @@ router.post('/', function(req, res, next) {
    console.log(body)
    if (vld.hasFields(body, RequiredFields.postQueue, null) &&
     vld.allowOnlyFields(body, AllowedFields.postQueue, null) &&
-    vld.check(!body.private|| (body.private && body.password),
+    vld.check(!body.isPrivate|| (body.private && body.password),
     Tags.missingField, ["password"], null)) {
 
       let password = body.password ? body.password : null;
@@ -85,7 +85,7 @@ router.post('/', function(req, res, next) {
          defaults: {
             name: body.name,
             owner: req.session.id,
-            private: body.private,
+            isPrivate: body.isPrivate,
             password: body.password ? body.password : null,
             curMembers: body.members.length + 1,
             maxMembers: MaxFields.QUEUE_MEMBERS,

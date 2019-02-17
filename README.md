@@ -3,11 +3,36 @@
 ## Getting Started
 To start the REST api clone the repo and `cd` into the directory. The `app.js` is the file used to start the server. The folder `router` contains all files corresponding with each endpoint documented below. The `models` folder contains all database model representations. Lastly, the `migrations` and `seeders` folders contain database migration and database seeding files.
 
+#### Setting up computer to use REST API with a local database:
+- Install mysql and setup root user
+	- Run: $ export PATH="/usr/local/mysql/bin:$PATH"
+- Create database called queueit_dev by opening terminal
+```
+$ mysql -u root -p
+mysql> create database queueit_dev;
+mysql> use mysql;
+mysql> alter user ‘root’@‘localhost' identified with mysql_native_password by ‘NEW_PASSWORD'
+```
+- Update config/config.json
+	- Update root password for mysql using the one you set previously
+	- Set database name if you called it something different
+- Navigate to root of project and run:
+```
+$ npm install
+$ npm install -g sequelize-cli
+$ node app.js //kill it after setting up
+$ sequelize db:migrate
+$ sequelize db:seed:all
+$ node app.js
+```
+
 #### To Run:
 ```
 - npm install
 - node app.js
 sequelize db:seed:all
+npm install
+node app.js
 ```
 
 #### Database Configuration

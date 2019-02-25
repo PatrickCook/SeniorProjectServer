@@ -29,15 +29,16 @@ Validator.AllowedFields = {
    postAuth: ['username', 'passwordHash'],
    putUser: ["username", "passwordHash"],
    postUser: ["username", "passwordHash", "role"],
-   postQueue: ["name", "private", "password", "members"],
+   postQueue: ["name", "isPrivate", "password", "members"],
    postJoin: ["password"]
 }
 
 Validator.RequiredFields = {
    postAuth: ['username', 'passwordHash'],
    postUser: ["username", "passwordHash"],
-   postQueue: ["name", "private", "members"],
+   postQueue: ["name", "isPrivate", "members"],
    isPlayingQueue: ["isPlaying"],
+   isPlayingSong: ["isPlaying", "queueID"],
    postSong: ["title", "artist", "albumURI", "spotifyURI"]
 }
 

@@ -12,6 +12,10 @@ module.exports = (sequelize, DataTypes) => {
     albumURI: DataTypes.STRING,
     previewURI: DataTypes.STRING,
     spotifyURI: DataTypes.STRING,
+    isPlaying: {
+      allowNul: false,
+      type: DataTypes.BOOLEAN
+   },
     createdAt: {
       allowNull: false,
       type: DataTypes.DATE

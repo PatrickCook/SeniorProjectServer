@@ -56,4 +56,41 @@ router.put('/:id/vote', function(req, res, next) {
    })
 })
 
+router.post('/:id/playing', function(req, res, next) {
+   var vld = req.validator;
+   var songId = req.params.id
+   var userId = req.session.id;
+
+   if (vld.hasFields(req.body, RequiredFields.isPlayingSong, null)) {
+      var queueID = req.body.queueID;
+
+      req.db.sequelize.query(`SELECT COUNT(*) as allowed FROM UserQueue WHERE QueueId=${queueID} AND UserId=${userId}`)
+      .spread((result, metadata) => {
+         if (result[0].allowed || vld.checkAdmin()) {
+            req.db.song.update(
+               {
+                  isPlaying: req.body.isPlaying
+               },
+               {where: {id: songId}}
+            ).then(song => {
+               if (song) {
+                  req.pusher.trigger('my-channel', 'song-playback-changed', {
+                     status: "success",
+                     message: "Song playback changed",
+                     songId: songId,
+                     isPlaying: req.body.isPlaying
+                  });
+                  res.json({ status: "success" }).status(200).end()
+               }
+            })
+         } else {
+            res.status(401).json({
+               status: "error",
+               error: "user is not member of queue",
+               data: []})
+         }
+     });
+   }
+});
+
 module.exports = router;

@@ -283,6 +283,7 @@ router.post('/:id/songs', function(req, res, next) {
                albumURI: body.albumURI,
                previewURI: body.previewURI ? body.previewURI : null,
                spotifyURI: body.spotifyURI,
+               isPlaying: false,
                owner: userId,
                votes: 0
             }).then(song => {

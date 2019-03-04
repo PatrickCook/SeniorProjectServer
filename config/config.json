@@ -1,23 +1,9 @@
 {
   "development": {
-    "username": "root",
-    "password": "Gibson1957@",
-    "database": "queueit_dev",
-    "host": "127.0.0.1",
-    "dialect": "mysql"
-  },
-  "test": {
-    "username": "root",
-    "password": null,
-    "database": "database_test",
-    "host": "127.0.0.1",
-    "dialect": "mysql"
-  },
-  "production": {
-    "username": "root",
-    "password": null,
-    "database": "database_production",
-    "host": "127.0.0.1",
+    "username": "b017f169402b05",
+    "password": "5ea99503",
+    "database": "heroku_b030726aaa46b19",
+    "host": "us-cdbr-iron-east-03.cleardb.net",
     "dialect": "mysql"
   }
 }

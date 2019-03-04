@@ -1,5 +1,5 @@
 {
-  "development": {
+  "env": {
     "username": "b017f169402b05",
     "password": "5ea99503",
     "database": "heroku_b030726aaa46b19",

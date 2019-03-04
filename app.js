@@ -37,6 +37,10 @@ app.use(function(error, req, res, next) {
 app.use(cookieParser());
 
 app.use(Session.router);
+
+app.use('/api/hello', function(req, res, next) {
+   res.json("Hello!")
+})
 /* Add validator and database utilities to request */
 app.use(function(req, res, next) {
   if (req.session || (req.method === 'POST' &&

@@ -264,6 +264,7 @@ router.delete('/:id', function(req, res, next) {
 * Allows user to add song to a queue
 */
 router.post('/:id/songs', function(req, res, next) {
+   var fetchedQueue
    var vld = req.validator;
    var body = req.body
    var queueId = req.params.id
@@ -277,6 +278,7 @@ router.post('/:id/songs', function(req, res, next) {
 
          req.db.queue.findOne({where: {id: queueId}})
          .then(queue => {
+            queue.update({ curSongs: sequelize.literal('curSongs + 1') }, { where: { id: queueId } });
             queue.createSong({
                title: body.title,
                artist: body.artist,
@@ -293,7 +295,13 @@ router.post('/:id/songs', function(req, res, next) {
                   queueId: queueId,
                   song: song
                });
+
+
                res.json({status: "success", data: song})
+            })
+            req.db.queue.findOne({where: {id: queueId}})
+            .then(queue => {
+
             })
          })
       } else {

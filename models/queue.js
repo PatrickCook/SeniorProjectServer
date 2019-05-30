@@ -16,7 +16,6 @@ module.exports = (sequelize, DataTypes) => {
     curMembers: DataTypes.INTEGER,
     maxMembers: DataTypes.INTEGER,
     curSongs: DataTypes.INTEGER,
-    curSongs: DataTypes.INTEGER,
     maxSongs: DataTypes.INTEGER,
     isPrivate: DataTypes.BOOLEAN,
     password: DataTypes.STRING,
